@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { restaurantList } from "../config";
+import Shimmer from "./Shimmer";
 
 // config driven ui
 
@@ -17,7 +18,7 @@ const RestaurantCard = ({ name, image, cuisines, rating }) => {
 function filterData(searchQuery, restaurants) {
   const data = restaurants.filter((card) => {
     console.log(card);
-    return card.name.includes(searchQuery);
+    return card.name.toLowerCase()?.includes(searchQuery.toLowerCase());
   });
 
   return data;
@@ -26,6 +27,20 @@ function filterData(searchQuery, restaurants) {
 const Body = () => {
   const [searchText, setSearchText] = useState(); // here kfc is default value
   const [restaurants, setRestaurants] = useState(restaurantList);
+  const [filteredRestaurant, setfilteredRestaurant] = useState(restaurantList);
+
+  // useEffect(() => {
+  //   getData();
+  // }, []);
+
+  // async function getData() {
+  //   const data = await fetch("https://animechan.xyz/api/quotes");
+  //   const dataInJson = data.json();
+  //   console.log(dataInJson);
+  // }
+
+  // early return -> it does not let the component to render.
+  if (restaurants == 0) return null;
 
   return (
     <>
@@ -46,17 +61,21 @@ const Body = () => {
             //  filter data
             const data = filterData(searchText, restaurants);
 
-            // update the state - restaurants
-            setRestaurants(data);
+            // update the state - filteredRestaurant
+            setfilteredRestaurant(data);
           }}
         >
           Search
         </button>
       </div>
       <div className="restaurant-list">
-        {restaurants.map((restaurant) => {
-          return <RestaurantCard {...restaurant} key={restaurant.restId} />;
-        })}
+        {filteredRestaurant.length == 0 ? (
+          <h1>no data found</h1>
+        ) : (
+          filteredRestaurant.map((restaurant) => {
+            return <RestaurantCard {...restaurant} key={restaurant.restId} />;
+          })
+        )}
       </div>
     </>
   );
