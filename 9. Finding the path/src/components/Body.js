@@ -40,7 +40,7 @@ const Body = () => {
   // }
 
   // early return -> it does not let the component to render.
-  if (restaurants == 0) return null;
+  if (restaurants == 0) return <Shimmer />;
 
   return (
     <>
