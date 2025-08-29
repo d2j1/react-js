@@ -1,0 +1,20 @@
+Inception - 
+
+
+Adding react to html file using cdn links - 
+
+add below scripts in the html file - These script will fetch the source code of react from CDN and add it in the html file which we can use in html file.
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+
+Once we add these in html then we will get React object in the console of the browser.
+
+Type React in the console of the browser.
+
+in above script tag crossorigin attribute is used to fetch the script without credentials like cookies, http auth etc.
+
+From above scripts we will get the react source code and React dom. 
+
+Dom - Document object model
