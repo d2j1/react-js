@@ -2,7 +2,7 @@
   "name": "ignite",
   "version": "1.0.0",
   "description": "This is a practice project",
-  "main": "app.js",
+ 
   "scripts": {
     "test": "jest"
   },
