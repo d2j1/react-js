@@ -1,0 +1,206 @@
+NPM - This manages the packages. It does not stand for Node Package Manager. 
+
+It is giant app store for javascript code and we can install all these packages by using cmd npm install <package_name>
+
+This downloads the package and adds it to the project and manages depedencies and keeps tracks of versions in a file callled package.json
+
+we can write scripts in package.json - 
+
+{
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest"
+  }
+}
+
+and run above scrits using - 
+
+npm start
+npm test
+
+
+Initialize NPM - 
+
+npm init  and then ans all the questions, this will create package.json file.
+
+package.json file is used to write the npm configuration 
+
+It is basically metadata file for the project which contains below - 
+Project name
+Version
+depedencies used 
+scripts to run.
+
+This file is created at the root of the project.
+
+
+Vite, Webpack and parcel takes all your project files (JavaScript, HTML, CSS, images, etc.), processes them, and bundles them into optimized files that browsers can understand.
+
+using parcel - 
+
+install parcel as a dev depedency - 
+
+npm install -D parcel
+
+in above command -D will install this depedency as dev.
+Dependencies are installed as dev when they are not required in the production once we build our project. 
+Parcel is required only untill we build our project.
+
+What is ^ in below before version no of the depedencies - 
+
+ "devDependencies": {
+    "parcel": "^2.15.4",
+    "process": "^0.11.10"
+  },
+  
+  
+  ^ means:
+Update to the latest minor and patch versions, but don’t change the major version.
+
+Examples:
+
+"^2.15.4" → allowed versions: >=2.15.4 <3.0.0
+
+"^1.2.3" → allowed versions: >=1.2.3 <2.0.0
+
+
+package-lock.json - 
+
+
+What is package-lock.json?
+
+It’s an automatically generated file by npm.
+
+It records the exact versions of every dependency (and sub-dependency) installed in your project.
+
+Ensures that everyone who installs your project gets the same dependency tree.
+
+🔹 Why do we need it?
+
+Let’s say your package.json has:
+
+"dependencies": {
+  "express": "^4.21.0"
+}
+
+
+This means npm is free to install any version between 4.21.0 and <5.0.0.
+
+On your laptop, npm might install 4.21.0.
+
+On your teammate’s laptop, a week later, npm might install 4.21.2.
+
+In production, npm might pick 4.21.3.
+
+ That could cause bugs and inconsistencies.
+
+ package-lock.json solves this by locking the exact versions that were installed when you last ran npm install.
+
+node-modules - 
+
+It’s the folder where npm (or yarn, pnpm, etc.) actually installs all your project’s dependencies so your code can use them.
+
+npm install - npm reads your package.json + package-lock.json and downloads all required libraries into node_modules/.
+
+This folder contains - 
+
+direct dependancies.
+sub-dependencies (dependencies of dependencies).
+Binary executable (.bin) - if package contains CLI commands.
+Package source code - index.js, package.json etc.
+
+Do not push node-modules folder to the git or production. 
+
+When we create the frontend build it contains only the part of dependecies that are actually used not entire node-modules.
+
+and in backend build depedencies are not added only project source code and configuration files are bundled. 
+
+While deploying backend build we have to install depedencies in the production using below command -
+
+npm install --production
+
+
+Run app using parcel - 
+
+navigate to the app folder and then run below command - 
+
+npx parcel index.html
+
+this hosts index.html file on server and gives the end point to accesss.
+
+
+
+Remove react CDN links from the index.html file and install react and react-dom using below commands - 
+
+npm install react
+npm install react-dom
+
+or 
+
+npm i reaact
+npm i react-dom
+
+Now that react has been installed we will have to change the script tag in index.html - add type attribute with module as a value - 
+
+<script type="module" src="index.js"></script>
+
+This will execute the index.js file as a module not as a browser script. 
+
+
+Parcel helps with below - 
+Dev Build
+Local Server
+HMR - Hot Module Replacement -
+
+Hot Module Replacement = the ability to update parts of your app in the browser without doing a full page reload.
+
+When you change a file (like a React component, CSS, or even assets), Parcel:
+
+Detects the file change.
+Rebuilds only the changed module (not the whole app).
+Pushes the update to the browser using WebSocket.
+The browser replaces just that module in memory.
+
+This way:
+Your app state (like data in a React component or Redux store) is preserved.
+The reload is super fast compared to a full refresh.
+You see your changes instantly.
+
+
+Parcel uses file watching algorithm which is written in c++.
+Parcel caches in parcel-cache folder.
+It optimizes the images.
+It minimizes the code.
+bundle files together.
+compress the bundle.
+Error handling.
+HTTPs.
+it does Consistent hashing - Parcel generates hashed filenames for built assets.
+
+code splitting -splitting your big bundle into smaller bundles (chunks) so the browser only loads what’s needed.
+
+Defferential bundling - to support older browsers.
+Tree shaking - Tree shaking = removing unused code (a.k.a. dead code elimination) from your final bundle.
+
+
+To create production build of this project using parcel - 
+
+npx parcel build index.html
+
+
+
+
+Browsers list - 
+
+browserslist is a configuration in React that tells tools like Parcel, Babel, PostCSS, Autoprefixer, etc. which browsers you want your code to support.
+
+Without browserslist, your build might break on older browsers.
+
+Modern bundlers (like Parcel or Webpack) can transpile/polyfill your code depending on which browsers you need to support.
+
+add below in the package.json - 
+follow - https://browserslist.dev/
+
+"browserslist": [
+  "last 2 versions"
+]
