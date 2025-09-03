@@ -10,6 +10,7 @@ const Title1 = () => (
   </div>
 );
 
+const heading = React.createElement("h1", { id: "title" }, "This is h1 tag");
 var xyz = 12;
 
 const HeaderComponent = () => {
