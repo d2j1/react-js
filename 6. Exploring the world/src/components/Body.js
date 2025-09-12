@@ -29,18 +29,20 @@ const Body = () => {
   const [restaurants, setRestaurants] = useState(restaurantList);
   const [filteredRestaurant, setfilteredRestaurant] = useState(restaurantList);
 
-  // useEffect(() => {
-  //   getData();
-  // }, []);
+  useEffect(() => {
+    getData();
+  }, []);
 
-  // async function getData() {
-  //   const data = await fetch("https://animechan.xyz/api/quotes");
-  //   const dataInJson = data.json();
-  //   console.log(dataInJson);
-  // }
+  async function getData() {
+    const data = await fetch("https://animechan.xyz/api/quotes");
+    const dataInJson = await data.json();
+    setRestaurants(dataInJson);
+    setfilteredRestaurant(dataInJson);
+    console.log(dataInJson);
+  }
 
   // early return -> it does not let the component to render.
-  if (restaurants == 0) return null;
+  if (restaurants.length == 0) return <Shimmer />;
 
   return (
     <>

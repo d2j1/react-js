@@ -1,0 +1,692 @@
+
+useEffect hook - 
+
+
+What is useEffect?
+
+useEffect is a React Hook that lets you run side effects in functional components.
+A side effect means anything that affects something outside of the component’s render cycle — like:
+
+Fetching data from an API
+
+Subscribing to events (e.g., window resize, keypress)
+
+Setting up timers (setInterval, setTimeout)
+
+Manipulating the DOM manually (though usually avoided in React)
+
+Storing data in localStorage or syncing with external systems
+
+In class components, we used lifecycle methods (componentDidMount, componentDidUpdate, componentWillUnmount).
+In functional components, all of these are handled with useEffect.
+
+🔹 Syntax
+useEffect(() => {
+  // Side effect logic here
+  return () => {
+    // Optional cleanup function
+  };
+}, [dependencies]);
+
+Explanation:
+
+First argument → a function (effect callback).
+
+Runs after React has rendered/updated the DOM.
+
+Return function (optional) → cleanup logic.
+
+Used for removing subscriptions, clearing timers, etc.
+
+Second argument → dependency array.
+
+Tells React when to run the effect.
+
+🔹 How dependency array works
+
+No dependency array
+
+useEffect(() => {
+  console.log("Runs after every render");
+});
+
+
+✅ Effect runs after every render (initial + updates).
+
+Empty dependency array []
+
+useEffect(() => {
+  console.log("Runs only once (on mount)");
+}, []);
+
+
+✅ Effect runs only on the first render (like componentDidMount).
+
+With dependencies [state1, prop2]
+
+useEffect(() => {
+  console.log("Runs whenever state1 or prop2 changes");
+}, [state1, prop2]);
+
+
+✅ Effect runs when any value in the dependency array changes.
+
+🔹 Cleanup function
+
+Often, effects need cleanup.
+Example: clearing an interval or unsubscribing from an event.
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    console.log("Tick");
+  }, 1000);
+
+  return () => {
+    clearInterval(interval);
+    console.log("Cleanup before unmount or re-run");
+  };
+}, []);
+
+
+The return function runs before the component unmounts.
+
+If dependencies are present, cleanup also runs before the effect re-runs.
+
+🔹 Common use cases of useEffect
+1. Fetching data
+import { useEffect, useState } from "react";
+
+function Users() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then(res => res.json())
+      .then(data => setUsers(data));
+  }, []); // Run once on mount
+
+  return (
+    <ul>
+      {users.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
+  );
+}
+
+2. Event listeners
+useEffect(() => {
+  const handleResize = () => console.log(window.innerWidth);
+  window.addEventListener("resize", handleResize);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+  };
+}, []);
+
+3. Syncing with localStorage
+const [theme, setTheme] = useState("light");
+
+useEffect(() => {
+  localStorage.setItem("theme", theme);
+}, [theme]); // Save whenever theme changes
+
+4. Timer/Interval
+useEffect(() => {
+  const timer = setTimeout(() => {
+    console.log("Executed after 2s");
+  }, 2000);
+
+  return () => clearTimeout(timer);
+}, []);
+
+🔹 Important Things to Remember
+
+Runs after render
+
+Unlike normal JS, useEffect runs after the DOM update, not during render.
+
+Dependencies must be complete
+
+Always include all state/props that your effect uses in the dependency array, otherwise you may get stale values.
+
+Multiple effects
+
+You can have multiple useEffect calls inside one component — they are independent.
+
+Cleanup runs before re-run
+
+Helps avoid memory leaks.
+
+🔹 Production Best Practices
+
+Always clean up timers, subscriptions, and event listeners.
+
+Avoid expensive logic inside useEffect without dependencies — it will slow down the app.
+
+If effect depends on a function, memoize the function using useCallback to avoid unnecessary re-runs.
+
+For data fetching, consider libraries like React Query instead of raw useEffect + fetch.
+
+✅ In short:
+
+useEffect = lifecycle management in functional components.
+
+Handles mount, update, and unmount behavior.
+
+Prevents memory leaks with cleanup.
+
+useEffect with async and await - 
+
+
+import { useEffect, useState } from "react";
+
+function Users() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Define async function inside
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("https://jsonplaceholder.typicode.com/users");
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data = await response.json();
+        setUsers(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers(); // Call async function
+  }, []); // Run once on mount
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <ul>
+      {users.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
+  );
+}
+
+export default Users;
+
+
+
+Refetch when id changes - 
+
+function UserDetails({ id }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const res = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
+      const data = await res.json();
+      setUser(data);
+    };
+
+    fetchUser();
+  }, [id]); // Refetch whenever id changes
+
+  if (!user) return <p>Loading...</p>;
+
+  return <h2>{user.name}</h2>;
+}
+
+
+
+Fetch API of javascript - 
+
+async function fetchUsers() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/users");
+    if (!response.ok) {
+      throw new Error("Failed to fetch users");
+    }
+    const data = await response.json();
+    console.log(data); // Use the data here
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+fetchUsers(); // Call it like a normal function
+
+
+
+async function fetchUserById(id) {
+  try {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
+    const user = await response.json();
+    console.log(user);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+fetchUserById(3);
+
+
+async function fetchPostsAndUsers() {
+  try {
+    const [postsRes, usersRes] = await Promise.all([
+      fetch("https://jsonplaceholder.typicode.com/posts"),
+      fetch("https://jsonplaceholder.typicode.com/users"),
+    ]);
+
+    const posts = await postsRes.json();
+    const users = await usersRes.json();
+
+    console.log("Posts:", posts.length);
+    console.log("Users:", users.length);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+}
+
+fetchPostsAndUsers();
+
+
+CORS issue - 
+
+
+What is CORS?
+
+CORS stands for Cross-Origin Resource Sharing.
+It’s a security mechanism built into browsers that controls how resources (APIs, fonts, images, etc.) can be requested from a different origin (domain/port/protocol) than the one your frontend app is running on.
+
+🔹 What is an "origin"?
+
+An origin is defined by a combination of:
+
+Protocol (http vs https)
+
+Domain/host (example.com)
+
+Port (:3000, :8080, etc.)
+
+So:
+
+http://localhost:3000 and http://localhost:5000 → different origins
+
+http://example.com and https://example.com → different origins
+
+https://api.example.com and https://example.com → different origins
+
+🔹 Why do we need CORS?
+
+Without CORS, any website could send requests to any server on behalf of a logged-in user.
+Example: You’re logged into your bank account on one tab, and you open a malicious website on another tab. Without CORS, that site could secretly call your bank’s API and steal money.
+
+CORS protects users by making sure the server explicitly allows requests from your frontend’s origin.
+
+🔹 How it works
+
+Simple request (GET/POST without custom headers)
+
+Browser sends the request.
+
+Server includes a header like:
+
+Access-Control-Allow-Origin: http://localhost:3000
+
+
+If origin matches → browser allows response to be read.
+
+If not → browser blocks it (CORS error).
+
+Preflight request (for non-simple requests)
+
+If your request has custom headers (e.g., Authorization), methods like PUT/DELETE, or content types like application/json,
+
+Browser first sends an OPTIONS request (called a preflight).
+
+Server must respond with headers like:
+
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET, POST, PUT
+Access-Control-Allow-Headers: Content-Type, Authorization
+
+
+If server doesn’t respond correctly → browser blocks the request.
+
+🔹 What does a CORS issue look like?
+
+In browser console (Chrome/Firefox), you’ll see errors like:
+
+Access to fetch at 'https://api.example.com/data' from origin 'http://localhost:3000'
+has been blocked by CORS policy: 
+No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+
+Meaning → the API server didn’t allow your frontend’s origin.
+
+🔹 How to fix CORS issues
+
+Server-side fix (preferred)
+Configure the backend to send proper CORS headers.
+Example (Express.js):
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
+
+Wildcard (for dev/testing only)
+
+Access-Control-Allow-Origin: *
+
+
+Allows requests from any origin. 🚨 Not safe for production if sensitive data is involved.
+
+Use a proxy
+
+If you can’t change the backend (e.g., third-party API), you can set up a proxy server or use React’s proxy in package.json to forward requests.
+Example:
+
+"proxy": "http://localhost:5000"
+
+
+Browser extensions / disabling CORS (only for debugging)
+
+Not recommended for real apps. Only for quick testing.
+
+
+Shimmer UI - 
+
+Shimmer UI (also called Skeleton Loading Screen) is a design pattern used to improve user experience when data is loading.
+
+Instead of showing a blank screen or a spinner, you show a placeholder UI that looks like the final content but “shimmers” (animated gradient). This gives users the feeling that content is “loading in place” and makes the app feel faster.
+
+Example:
+
+Facebook shows grey boxes that shimmer before the posts load.
+
+LinkedIn shows grey blocks before profile info appears.
+
+E-commerce sites show product card skeletons before actual products render.
+
+🔹 Why use Shimmer UI?
+
+Better UX → users see the structure of what’s coming, not just a spinner.
+
+Perceived performance → feels faster, even if actual load time is the same.
+
+Consistency → layout doesn’t jump suddenly when data arrives.
+
+
+Shimmer card  -
+
+import React from "react";
+import "./Shimmer.css"; // CSS above
+
+function ShimmerCard() {
+  return <div className="shimmer shimmer-card"></div>;
+}
+
+export default ShimmerCard;
+
+
+
+Using shimmer while loading - 
+
+import React, { useEffect, useState } from "react";
+import ShimmerCard from "./ShimmerCard";
+
+function Products() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      // Simulating API fetch
+      setProducts([
+        { id: 1, name: "Apple" },
+        { id: 2, name: "Mango" },
+        { id: 3, name: "Banana" }
+      ]);
+      setLoading(false);
+    }, 2000);
+  }, []);
+
+  return (
+    <div style={{ display: "flex" }}>
+      {loading
+        ? [1, 2, 3].map((n) => <ShimmerCard key={n} />) // Show shimmer placeholders
+        : products.map((p) => (
+            <div key={p.id} className="product-card">
+              <h3>{p.name}</h3>
+            </div>
+          ))}
+    </div>
+  );
+}
+
+export default Products;
+
+
+Conditional rendering - 
+
+What is Conditional Rendering?
+
+Conditional rendering means:
+👉 You show different UI elements depending on some condition (usually state, props, or logic).
+
+Think of it like an if-else for your JSX.
+Instead of always rendering the same component tree, you render only what’s relevant at that moment.
+
+🔹 Real-world examples of conditional rendering
+
+Authentication
+
+Show “Login” button if the user is logged out.
+
+Show “Profile” page if the user is logged in.
+
+Loading states
+
+Show a shimmer/spinner while fetching data.
+
+Show data once it’s loaded.
+
+Feature toggles
+
+Show a premium feature only if user.isPremium is true.
+
+🔹 Example 1: if/else inside JSX
+function Greeting({ isLoggedIn }) {
+  if (isLoggedIn) {
+    return <h2>Welcome back!</h2>;
+  } else {
+    return <h2>Please log in.</h2>;
+  }
+}
+
+🔹 Example 2: Ternary operator (inline)
+function Greeting({ isLoggedIn }) {
+  return (
+    <div>
+      {isLoggedIn ? <h2>Welcome back!</h2> : <h2>Please log in.</h2>}
+    </div>
+  );
+}
+
+🔹 Example 3: Logical AND (&&)
+
+Useful when you want to render something only if a condition is true.
+
+function Notification({ hasNewMessages }) {
+  return (
+    <div>
+      <h2>Dashboard</h2>
+      {hasNewMessages && <p>You have new messages!</p>}
+    </div>
+  );
+}
+
+🔹 Example 4: Conditional component rendering
+function App({ isLoading }) {
+  return (
+    <div>
+      {isLoading ? <p>Loading...</p> : <MainContent />}
+    </div>
+  );
+}
+
+🔹 Example 5: Multiple conditions (switch-like)
+function Status({ status }) {
+  switch (status) {
+    case "loading":
+      return <p>Loading...</p>;
+    case "error":
+      return <p>Error occurred!</p>;
+    case "success":
+      return <p>Data loaded successfully!</p>;
+    default:
+      return null;
+  }
+}
+
+🔹 Key points
+
+Conditional rendering is just JavaScript logic inside JSX.
+
+Use:
+
+if/else for longer logic.
+
+Ternary ? : for short inline conditions.
+
+&& when rendering something only if condition is true.
+
+Helps keep UI dynamic and responsive to state/props.
+
+
+
+How we are able to change the value of const state variable - 
+
+When we write:
+
+const [count, setCount] = useState(0);
+
+
+count is declared with const, which normally means you cannot reassign it.
+
+But later we do:
+
+setCount(count + 1);
+
+
+… and somehow the value of count changes!
+So the question is: how can a const variable change?
+
+🔹 The trick: const doesn’t freeze values
+
+In JavaScript, const only means:
+
+The reference itself cannot be reassigned.
+
+The value that the reference points to can change (if it’s managed somewhere else).
+
+Example outside React:
+
+const arr = [1, 2];
+arr.push(3);       // ✅ allowed
+console.log(arr);  // [1, 2, 3]
+
+// But this is ❌ not allowed:
+arr = [4, 5];
+
+
+So const protects the binding, not the underlying value.
+
+🔹 What React does with useState
+
+When you call:
+
+const [count, setCount] = useState(0);
+
+
+React does two things:
+
+It gives you the current state value (count).
+
+It gives you a setter function (setCount) that tells React:
+👉 “Please update the state value stored internally, and then re-render my component.”
+
+🔹 Why the variable looks like it changes
+
+When you call:
+
+setCount(count + 1);
+
+
+React doesn’t “mutate” the count variable.
+
+Instead, it:
+
+Stores the new value in its internal state system.
+
+Triggers a re-render of your component.
+
+On the next render, React calls your component function again, and now useState gives you the updated value.
+
+So what’s happening is:
+
+The count variable itself is still const — it doesn’t change.
+
+What changes is the value React passes into it on each render.
+
+Each render is like calling your component function again with new values.
+
+🔹 Mental model
+
+Think of it like this:
+
+// First render
+const [count, setCount] = [0, setFn]; 
+
+// After calling setCount(1) and re-render
+const [count, setCount] = [1, setFn];
+
+// After calling setCount(2) and re-render
+const [count, setCount] = [2, setFn];
+
+
+Each render creates a new binding for count.
+It’s not the same variable being mutated — it’s a new const variable with a new value from React.
+
+🔹 Why use const and not let?
+
+Because:
+
+You never reassign count directly (count = something is not allowed).
+
+You always update via setCount.
+
+Using const communicates clearly: this variable will not be reassigned in this render.
+
+If we used let, it would look like we could reassign it (but we actually shouldn’t).
+
+✅ In short:
+
+const doesn’t freeze the value — it just prevents reassignment.
+
+React re-runs your component on each render, so each time you get a new const binding with the updated state.
+
+setState doesn’t mutate the variable; it schedules a re-render with a new value.
+
+
+
+Whenever value of the state variable changes, react triggers a reconciliation cycle which re-renders the component.
+
+
