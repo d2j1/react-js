@@ -24,14 +24,16 @@ const Header = () => {
           </li>
 
           <li>
-            <Link to="">Services</Link>
+            <Link to="/services">Services</Link>
           </li>
 
           <li>
             <Link to="/about">About us</Link>{" "}
           </li>
 
-          <li>Cart</li>
+          <li>
+            <Link to="/cart">Cart</Link>
+          </li>
         </ul>
       </div>
       {isLoggedIn ? (

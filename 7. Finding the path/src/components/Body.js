@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { restaurantList } from "../config";
 import Shimmer from "./Shimmer";
+import { Link } from "react-router-dom";
 
 // config driven ui
 
@@ -73,7 +74,7 @@ const Body = () => {
           <h1>no data found</h1>
         ) : (
           filteredRestaurant.map((restaurant) => {
-            return <RestaurantCard {...restaurant} key={restaurant.restId} />;
+            return <Link to={`/restaurant/${restaurant.restId}`} key={restaurant.restId}><RestaurantCard {...restaurant} /></Link>;
           })
         )}
       </div>
