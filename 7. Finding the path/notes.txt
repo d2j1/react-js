@@ -1,0 +1,156 @@
+
+Never create state variables inside if, for or function block.
+
+
+What is React Router?
+
+React Router is a client-side routing library for React.
+It allows you to build Single Page Applications (SPA) where navigation between “pages” doesn’t require a full browser reload.
+
+👉 Instead of loading a new HTML file from the server, React Router swaps components dynamically based on the URL.
+This makes apps faster and smoother.
+
+🔹 Why do we need React Router?
+
+In plain React, you can render components, but:
+
+The browser URL won’t change.
+
+You can’t share or bookmark pages properly.
+
+Back/forward buttons don’t work naturally.
+
+React Router fixes this by:
+
+Listening to the browser URL.
+
+Matching it with the defined routes.
+
+Rendering the correct component for that route.
+
+
+Check the code in index.js for implementation of the routes - 
+
+in below code the routing configuration is writte in appRouter and AppLayout is the main component. Whenever we click on any link on navbar it will open that page by replacing the Outlet component. When we click on about link it will open the about page inbetween Header and Footer components like this it goes for all the links on navigation bar.
+
+index.js - 
+
+import React from "react";
+import { createRoot } from "react-dom/client";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Body from "./components/Body";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import About from "./components/About";
+import Error from "./components/Error";
+import Services from "./components/Services";
+import Cart from "./components/Cart";
+
+const AppLayout = () => {
+  return (
+    <>
+      <Header />
+      <Outlet />
+      <Footer />
+    </>
+  );
+};
+
+const appRouter = createBrowserRouter([
+  {
+  path: "/",
+  element: <AppLayout />,
+  errorElement: <Error />,
+  children: [
+    {
+      path:"/",
+      element:<Body />
+    },    
+  {
+    path: "/about",
+    element: <About />,
+  },
+  {
+    path: "/services",
+    element: <Services />,
+  },
+  {
+    path: "/cart",
+    element: <Cart />,
+  }],
+  },
+]);
+
+const root = createRoot(document.getElementById("root"));
+
+root.render(<RouterProvider router={appRouter} />);
+
+
+
+Dynamic routing - 
+
+  {
+    path: "/restaurant/:resId",
+    element: <RestaurantMenu />,
+  }
+  
+  RestaurantMenu.js - 
+  
+  
+  import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
+import { useParams } from "react-router-dom";
+
+const RestaurantMenu = () => {
+
+    const [menuItems, setMenuItems] = useState([]);
+    const { resId } = useParams();
+    console.log(resId);
+    
+    useEffect(() => {
+        // when component loads
+        getMenuData();
+    }, []);
+
+    const getMenuData = () => {
+        //  call the api with resId, for now managing with dummy data
+
+         const menuItemsTemp = [
+        { id: 1, name: "Pizza" },
+        { id: 2, name: "Burger" },
+        { id: 3, name: "Diet Coke" },
+        { id: 4, name: "Pasta" },
+        { id: 5, name: "Veg Burger" },
+    ];
+
+    setMenuItems(menuItemsTemp);
+
+    };  
+
+
+   
+
+    return (
+      <>
+        {menuItems.length === 0 ? (
+          <Shimmer />
+        ) : (
+          <div className="menu">
+            <h1>Restaurant Name</h1>
+            <p>Menu</p>
+            <ul>
+              {menuItems.map((item) => (
+                <li key={item.id}>{item.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </>
+    );
+};
+
+
+export default RestaurantMenu;
+
+
+
