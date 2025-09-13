@@ -1,0 +1,439 @@
+
+Each component should have single responsibility.
+
+In this we are creating the custom hook which will fetch the restaurant data and takes restaurant id as the input in the prop.
+
+useRestaurantMenu - custom hook.
+
+Create custom hooks in the util folder.
+
+
+Custom hooks - 
+
+What are Custom Hooks in React?
+
+Custom Hooks are JavaScript functions in React whose names start with "use" and that can call other hooks (like useState, useEffect, etc.).
+
+They allow you to extract and reuse logic across multiple components, so you don’t repeat code.
+
+They don’t add new features to React — they’re just a way to organize shared stateful logic.
+
+Think of them as:
+
+Normal functions ➝ but with hook powers.
+
+Reusable building blocks ➝ for managing side effects, state, subscriptions, etc.
+
+🔹 Example 1: A Counter Hook
+import { useState } from "react";
+
+// custom hook
+const useCounter = (initialValue = 0) => {
+  const [count, setCount] = useState(initialValue);
+
+  const increment = () => setCount(count + 1);
+  const decrement = () => setCount(count - 1);
+  const reset = () => setCount(initialValue);
+
+  return { count, increment, decrement, reset };
+};
+
+export default useCounter;
+
+
+Usage:
+
+import React from "react";
+import useCounter from "./useCounter";
+
+const CounterComponent = () => {
+  const { count, increment, decrement, reset } = useCounter(5);
+
+  return (
+    <div>
+      <h2>Count: {count}</h2>
+      <button onClick={increment}>➕</button>
+      <button onClick={decrement}>➖</button>
+      <button onClick={reset}>🔄</button>
+    </div>
+  );
+};
+
+export default CounterComponent;
+
+🔹 Example 2: Fetching Data Hook
+import { useState, useEffect } from "react";
+
+// custom hook
+const useFetch = (url) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url);
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+};
+
+export default useFetch;
+
+
+Usage:
+
+import React from "react";
+import useFetch from "./useFetch";
+
+const UserList = () => {
+  const { data, loading, error } = useFetch("https://jsonplaceholder.typicode.com/users");
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Something went wrong!</p>;
+
+  return (
+    <ul>
+      {data.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
+  );
+};
+
+export default UserList;
+
+🔹 Example 3: Window Size Hook
+import { useState, useEffect } from "react";
+
+const useWindowSize = () => {
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return size;
+};
+
+export default useWindowSize;
+
+
+Usage:
+
+import React from "react";
+import useWindowSize from "./useWindowSize";
+
+const WindowComponent = () => {
+  const { width, height } = useWindowSize();
+
+  return <h2>Window size: {width} x {height}</h2>;
+};
+
+export default WindowComponent;
+
+
+✅ Summary:
+Custom hooks = reusable stateful logic.
+You can build hooks for counters, form handling, API calls, authentication, debouncing, localStorage sync, etc.
+
+
+Create a hook which detects whether we are online or not - 
+
+Online event in browser - 
+
+https://developer.mozilla.org/en-US/docs/Web/API/Window/online_event
+
+
+
+Optimizing the app - 
+
+
+The Problem
+
+When you build a React app, all your components, libraries, and dependencies get bundled into JavaScript files.
+
+If your app is small → that’s fine.
+
+But as your app grows → bundle size grows → slow initial page load.
+
+So React + bundlers (Webpack, Vite, etc.) provide ways to split and load code intelligently.
+
+1. Chunking
+
+What it is: Breaking a large JavaScript bundle into smaller chunks.
+
+Why: Instead of loading the entire app at once, you load smaller pieces → faster load.
+
+How it works: Bundlers like Webpack automatically split vendor libraries (e.g., react, lodash) into separate chunks and your app code into another chunk.
+
+👉 Example:
+
+Before chunking: bundle.js (5 MB) → loaded at once.
+
+After chunking:
+
+vendor.chunk.js (React, libraries)
+
+app.chunk.js (your app logic)
+
+runtime.chunk.js (Webpack runtime)
+
+This way: browser can cache vendor code separately, and only update app code when needed.
+
+2. Code Splitting
+
+What it is: Technique to load only the code required for a page or feature, instead of loading everything upfront.
+
+React support: Built-in via React.lazy and Suspense.
+
+Why: Helps reduce initial bundle size → faster first paint.
+
+👉 Example:
+
+import React, { Suspense, lazy } from "react";
+
+const About = lazy(() => import("./About"));
+const Contact = lazy(() => import("./Contact"));
+
+const App = () => (
+  <div>
+    <h1>My App</h1>
+    <Suspense fallback={<p>Loading...</p>}>
+      <About />
+      <Contact />
+    </Suspense>
+  </div>
+);
+
+export default App;
+
+
+Here:
+
+Instead of bundling About and Contact inside the main bundle, React splits them and loads them only when needed.
+
+3. Dynamic Bundling
+
+What it is: Loading code on-demand at runtime, based on user interaction or route.
+
+Think of it as "lazy loading + context-based bundling".
+
+This is especially useful in Single Page Applications (SPAs) where not all routes are visited.
+
+👉 Example: Route-based bundling with React Router + dynamic import
+
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Suspense, lazy } from "react";
+
+const Home = lazy(() => import("./Home"));
+const Dashboard = lazy(() => import("./Dashboard"));
+const Settings = lazy(() => import("./Settings"));
+
+const App = () => (
+  <Router>
+    <Suspense fallback={<p>Loading page...</p>}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </Suspense>
+  </Router>
+);
+
+
+User visits / → only Home bundle loads.
+
+User goes to /dashboard → React dynamically fetches Dashboard bundle.
+
+This makes your initial load extremely fast.
+
+🔹 How They Work Together
+
+Chunking → splits the code into multiple files automatically.
+
+Code Splitting → lets you decide what code should be split (per component/route).
+
+Dynamic Bundling → loads those code-split bundles only when needed at runtime.
+
+✅ Benefits:
+
+Faster initial page load.
+
+Better caching (unchanged chunks don’t reload).
+
+Users only download code they actually need.
+
+
+4. Tree Shaking
+
+What it is: Process of removing unused code from the final bundle.
+
+Works best with ES6 modules (import/export) because bundlers can analyze dependencies.
+
+Example:
+
+// utils.js
+export const add = (a, b) => a + b;
+export const subtract = (a, b) => a - b;
+
+// app.js
+import { add } from "./utils";
+console.log(add(2, 3));
+
+
+Here, subtract is never used → bundler removes it from the final build.
+
+✅ Helps keep bundles lean.
+⚠️ Requires build tools like Webpack, Rollup, or Vite with mode: "production".
+
+🔹 5. Lazy Loading Images & Assets
+
+Instead of loading all images, videos, or heavy files on initial render, load them when they appear on screen.
+
+React libraries: react-lazyload, react-intersection-observer, or even plain HTML loading="lazy".
+
+👉 Example:
+
+<img src="big-banner.jpg" alt="Banner" loading="lazy" />
+
+
+✅ Saves bandwidth, faster initial load.
+✅ Improves Largest Contentful Paint (LCP) score in Core Web Vitals.
+
+🔹 6. Bundle Analyzer
+
+What it is: A tool to visualize your bundle size and see what’s inside.
+
+Helps you catch unnecessary dependencies bloating your app.
+
+Popular tools:
+
+webpack-bundle-analyzer
+
+source-map-explorer
+
+Vite’s built-in analyze
+
+👉 Run (for Webpack apps):
+
+npm install webpack-bundle-analyzer --save-dev
+
+
+And add to webpack config:
+
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+
+module.exports = {
+  plugins: [new BundleAnalyzerPlugin()],
+};
+
+
+This opens a report showing which libraries are taking space.
+
+🔹 7. Minification & Compression
+
+Minification: Removes whitespace, renames variables, shortens code.
+
+Compression: Uses algorithms like Gzip or Brotli to shrink file sizes before sending them to the client.
+
+👉 In Webpack/Vite → enabled by default in production mode.
+👉 In deployment → configure your server (e.g., Nginx, Vercel, Netlify) to serve compressed JS/CSS.
+
+✅ Can reduce bundle sizes by 60–80%.
+
+🔹 8. Using CDN & Caching
+
+Host static assets (JS, CSS, images) on a CDN for faster delivery.
+
+Use cache-busting (filehash in filenames) so browser caches assets correctly.
+
+👉 Example:
+
+First build: main.abc123.js
+
+Next build: main.xyz456.js
+This ensures users don’t get stale JS files.
+
+🔹 9. Avoiding Heavy Dependencies
+
+Every dependency increases bundle size.
+
+Instead of importing the whole library, import only what you need.
+
+❌ Bad:
+
+import _ from "lodash";
+const result = _.debounce(() => console.log("test"), 300);
+
+
+✅ Good:
+
+import debounce from "lodash/debounce";
+const result = debounce(() => console.log("test"), 300);
+
+
+✅ Or even better → replace with native JS or a smaller library.
+
+🔹 10. Server-Side Rendering (SSR) & Static Site Generation (SSG)
+
+SSR (Next.js, Remix): Render pages on the server → faster initial load.
+
+SSG (Next.js, Gatsby): Pre-render pages at build time → instant load from CDN.
+
+Great for SEO & performance on large apps.
+
+🔹 11. Memoization & Pure Components (Runtime Optimization)
+
+Use React.memo, useMemo, and useCallback to avoid unnecessary re-renders.
+
+Doesn’t reduce bundle size, but improves runtime performance.
+
+👉 Example:
+
+import React, { useMemo } from "react";
+
+const ExpensiveCalc = ({ num }) => {
+  const result = useMemo(() => {
+    console.log("Running expensive calc...");
+    return num * 1000;
+  }, [num]);
+
+  return <p>Result: {result}</p>;
+};
+
+export default React.memo(ExpensiveCalc);
+
+
+✅ Summary — React App Optimization Layers
+
+Build-level optimizations: Chunking, Code Splitting, Dynamic Bundling, Tree Shaking, Minification, Compression.
+
+Network-level optimizations: CDN, Caching, Lazy Loading assets.
+
+Code-level optimizations: Avoid heavy dependencies, Memoization, Pure components.
+
+Architecture-level optimizations: SSR, SSG, Hybrid rendering.
+
+
+
