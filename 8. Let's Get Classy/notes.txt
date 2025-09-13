@@ -1,156 +1,383 @@
 
-Never create state variables inside if, for or function block.
+In class based components the states are
+created in constructor.
 
 
-What is React Router?
+when class based components are called then first constructor is called and then render is called.
 
-React Router is a client-side routing library for React.
-It allows you to build Single Page Applications (SPA) where navigation between “pages” doesn’t require a full browser reload.
-
-👉 Instead of loading a new HTML file from the server, React Router swaps components dynamically based on the URL.
-This makes apps faster and smoother.
-
-🔹 Why do we need React Router?
-
-In plain React, you can render components, but:
-
-The browser URL won’t change.
-
-You can’t share or bookmark pages properly.
-
-Back/forward buttons don’t work naturally.
-
-React Router fixes this by:
-
-Listening to the browser URL.
-
-Matching it with the defined routes.
-
-Rendering the correct component for that route.
-
-
-Check the code in index.js for implementation of the routes - 
-
-in below code the routing configuration is writte in appRouter and AppLayout is the main component. Whenever we click on any link on navbar it will open that page by replacing the Outlet component. When we click on about link it will open the about page inbetween Header and Footer components like this it goes for all the links on navigation bar.
-
-index.js - 
-
-import React from "react";
-import { createRoot } from "react-dom/client";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Body from "./components/Body";
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import About from "./components/About";
-import Error from "./components/Error";
-import Services from "./components/Services";
-import Cart from "./components/Cart";
-
-const AppLayout = () => {
-  return (
-    <>
-      <Header />
-      <Outlet />
-      <Footer />
-    </>
-  );
-};
-
-const appRouter = createBrowserRouter([
-  {
-  path: "/",
-  element: <AppLayout />,
-  errorElement: <Error />,
-  children: [
-    {
-      path:"/",
-      element:<Body />
-    },    
-  {
-    path: "/about",
-    element: <About />,
-  },
-  {
-    path: "/services",
-    element: <Services />,
-  },
-  {
-    path: "/cart",
-    element: <Cart />,
-  }],
-  },
-]);
-
-const root = createRoot(document.getElementById("root"));
-
-root.render(<RouterProvider router={appRouter} />);
+when class based components are called then first constructor of the parent class is called and then render of parent class is called and now child constructor is called and then child render is called.
 
 
 
-Dynamic routing - 
 
-  {
-    path: "/restaurant/:resId",
-    element: <RestaurantMenu />,
-  }
-  
-  RestaurantMenu.js - 
-  
-  
-  import { useEffect, useState } from "react";
-import Shimmer from "./Shimmer";
-import { useParams } from "react-router-dom";
+below method is called when component is mounted - 
 
-const RestaurantMenu = () => {
+componentDidMount(){
 
-    const [menuItems, setMenuItems] = useState([]);
-    const { resId } = useParams();
-    console.log(resId);
-    
-    useEffect(() => {
-        // when component loads
-        getMenuData();
-    }, []);
+}
 
-    const getMenuData = () => {
-        //  call the api with resId, for now managing with dummy data
+ComponentDidMount is same as useEffect, we can use this for calling apis and other side effects.
 
-         const menuItemsTemp = [
-        { id: 1, name: "Pizza" },
-        { id: 2, name: "Burger" },
-        { id: 3, name: "Diet Coke" },
-        { id: 4, name: "Pasta" },
-        { id: 5, name: "Veg Burger" },
-    ];
+below is the order of function calls in class component - 
+1) Constructor 
+2) Render
+3) Component did mount
 
-    setMenuItems(menuItemsTemp);
+and below is the order of function call in class component of parent and child - 
 
-    };  
+1) parent Constructor 
+2) parent Render
+3) child constructor
+4) child render 
+5) child Component did mount
+6) parent Component did mount
 
 
-   
 
-    return (
-      <>
-        {menuItems.length === 0 ? (
-          <Shimmer />
-        ) : (
-          <div className="menu">
-            <h1>Restaurant Name</h1>
-            <p>Menu</p>
-            <ul>
-              {menuItems.map((item) => (
-                <li key={item.id}>{item.name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </>
-    );
-};
+Parent Component with two child components - 
+
+We’re dealing with React class components, and the lifecycle methods constructor, render, and componentDidMount.
+You have a Parent component that renders two Child components.
+
+General Rules
+
+constructor()
+
+Called first when the component is being created.
+
+Initializes state, binds methods.
+
+Never cause side effects (like fetching data).
+
+render()
+
+Called right after constructor.
+
+Should be a pure function of props and state.
+
+Returns JSX.
+
+componentDidMount()
+
+Called once after the component has been inserted into the DOM.
+
+Good for network requests, subscriptions, timers, etc.
+
+Execution Order (Parent → Child)
+
+When the Parent is mounted (first time):
+
+Parent constructor()
+
+Parent render()
+
+Inside render, React sees two children → starts mounting them.
+
+Child1 constructor()
+
+Child1 render()
+
+Child2 constructor()
+
+Child2 render()
+
+Now React has built the virtual DOM tree of Parent + both Children.
+
+It commits this to the actual DOM.
+
+Child1 componentDidMount()
+
+Child2 componentDidMount()
+
+Parent componentDidMount()
+
+Why this order?
+
+React must fully render Parent and its Children before calling componentDidMount.
+
+Children finish mounting before the Parent is considered “done”, so their componentDidMount runs first.
+
+This ensures the Parent can safely interact with Child DOM nodes if needed in its own componentDidMount.
+
+✅ Final Order (mounting phase):
+
+Parent constructor
+Parent render
+Child1 constructor
+Child1 render
+Child2 constructor
+Child2 render
+Child1 componentDidMount
+Child2 componentDidMount
+Parent componentDidMount
 
 
-export default RestaurantMenu;
+React component lifecycle - 
 
+
+React Component Lifecycle (Class Components)
+
+Think of a React component’s life in three main phases:
+
+Mounting → when the component is being created and added to the DOM.
+
+Updating → when the component re-renders because of changes.
+
+Unmounting → when the component is removed from the DOM.
+
+Each phase has lifecycle methods that React calls in a specific order.
+
+1. Mounting Phase
+
+This happens when the component is first created and inserted into the DOM.
+
+Order:
+
+constructor(props)
+
+Called before anything else.
+
+Good place to initialize state and bind methods.
+
+Avoid side effects (like API calls) here.
+
+static getDerivedStateFromProps(props, state) (rarely used)
+
+Lets you update state based on props before rendering.
+
+Runs before every render, not just mounting.
+
+render()
+
+The only required method.
+
+Returns JSX to describe what the UI looks like.
+
+Should be pure (no state changes or API calls here).
+
+componentDidMount()
+
+Called once the component is fully mounted in the DOM.
+
+Perfect place for: API calls, setting up subscriptions, timers, DOM manipulation.
+
+2. Updating Phase
+
+This happens whenever a component re-renders due to changes in props or state.
+
+Order:
+
+static getDerivedStateFromProps(props, state)
+
+Same as before (rarely needed).
+
+Runs before each render.
+
+shouldComponentUpdate(nextProps, nextState)
+
+Lets you control performance optimization.
+
+Return true (default) to re-render, or false to block render.
+
+render()
+
+Called again to re-generate the JSX.
+
+getSnapshotBeforeUpdate(prevProps, prevState) (rarely used)
+
+Lets you capture information from the DOM before changes happen.
+
+Example: scroll position.
+
+componentDidUpdate(prevProps, prevState, snapshot)
+
+Called after the DOM is updated.
+
+Useful for reacting to prop/state changes, triggering network requests based on changes.
+
+⚠️ Make sure to wrap side effects in conditions to avoid infinite loops.
+
+3. Unmounting Phase
+
+This happens when the component is removed from the DOM.
+
+Order:
+
+componentWillUnmount()
+
+Cleanup goes here → cancel API calls, remove event listeners, clear timers.
+
+Very important for avoiding memory leaks.
+
+4. Error Handling Phase
+
+React also has lifecycle methods for handling errors in components.
+
+static getDerivedStateFromError(error)
+
+componentDidCatch(error, info)
+
+These are used inside Error Boundaries to catch errors in child components.
+
+✅ Simplified Flow
+Mounting
+constructor → render → componentDidMount
+
+Updating
+getDerivedStateFromProps → shouldComponentUpdate → render → getSnapshotBeforeUpdate → componentDidUpdate
+
+Unmounting
+componentWillUnmount
+
+🧠 Key Points to Remember
+
+constructor → setup state.
+
+render → return JSX (pure).
+
+componentDidMount → API calls, subscriptions.
+
+shouldComponentUpdate → optimization.
+
+componentDidUpdate → run code after update.
+
+componentWillUnmount → cleanup.
+
+
+componentDidUpdate and componentWillUnmount - 
+
+When a class component mounts (appears on the screen) and then updates (re-renders because of setState or new props), the lifecycle methods fire in this sequence:
+
+1. Mounting phase (when component is first created and inserted into the DOM)
+
+Order:
+
+constructor(props)
+
+Initializes state.
+
+Can bind methods if needed.
+
+Runs only once when the component is created.
+
+render()
+
+Returns JSX to describe what UI should look like.
+
+Pure function → should not have side effects (like data fetching).
+
+componentDidMount()
+
+Runs once after initial render.
+
+Safe place for:
+
+API calls
+
+Subscriptions
+
+Setting up timers
+
+If you call setState here, React will re-render again, but this happens after the initial render.
+
+2. Updating phase (when props or state change)
+
+Whenever you call this.setState() or a parent passes new props, React schedules an update.
+Order:
+
+render()
+
+Runs again to update the UI with new state/props.
+
+componentDidUpdate(prevProps, prevState)
+
+Runs after the re-render and after the updated DOM is painted.
+
+You can compare prevProps and prevState with current ones.
+
+Often used for:
+
+Reacting to prop/state changes (e.g., re-fetching data if an ID changed).
+
+Running code after DOM updates.
+
+⚠️ If you call setState inside componentDidUpdate without a condition, it will cause an infinite loop:
+
+componentDidUpdate() {
+   this.setState({count: this.state.count + 1}); // ❌ infinite loop
+}
+
+
+So, always guard with a condition:
+
+componentDidUpdate(prevProps, prevState) {
+   if (prevState.count !== this.state.count) {
+      console.log("Count changed, safe to update something");
+   }
+}
+
+3. Unmounting phase (when component is removed from DOM)
+
+componentWillUnmount()
+
+Cleanup work:
+
+Clear timers
+
+Remove event listeners
+
+Cancel network requests
+
+Runs only once, right before component is destroyed.
+
+🔹 Where componentDidUpdate Fits
+
+Imagine this flow in your UserClass example:
+
+constructor → initializes state with dummy data.
+
+render → renders with "Dummy Name / Default Location".
+
+componentDidMount → fetch starts, and then setState updates userInfo.
+
+render (again) → now React re-renders with fetched API data.
+
+componentDidUpdate → runs right after the DOM has updated with API data.
+
+If you press your Set Count button:
+
+setState is called → schedules re-render.
+
+render runs with new count.
+
+componentDidUpdate runs → logs "Component Did Update".
+
+🔹 Visual Flow Diagram (Textual)
+Mounting:
+constructor → render → componentDidMount
+
+Updating (on state/prop change):
+render → componentDidUpdate
+
+Unmounting:
+componentWillUnmount
+
+🔹 Key Points about componentDidUpdate
+
+Runs every time the component updates, unless prevented by shouldComponentUpdate (rarely used nowadays).
+
+Good for running side effects that depend on changes.
+
+Receives prevProps and prevState as arguments.
+
+Runs after the DOM has already updated → you can safely manipulate the DOM or read updated values.
+
+👉 So in your example:
+
+First render shows dummy data.
+
+After API fetch, setState updates → triggers re-render.
+
+Right after re-render, componentDidUpdate runs → logs "Component Did Update".
 
 
