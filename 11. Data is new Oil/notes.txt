@@ -1,0 +1,822 @@
+
+Higher order components - 
+
+What is a Higher-Order Component (HOC)?
+
+A Higher-Order Component (HOC) in React is a function that takes a component as input and returns a new enhanced component.
+
+It’s a design pattern used to reuse component logic.
+Think of it as a wrapper that adds extra functionality to an existing component without modifying it directly.
+
+
+In below example we will wrap RestaurantCard in the Wrapper - 
+
+
+const RestaurantCard = ({ name, image, cuisines, rating }) => {
+  return (
+    <div className=" h-60 w-40 p-4 m-4 shadow-lg bg-pink-50 hover:bg-pink-100 rounded-lg">
+      <img src={image} />
+      <h2 className="font-bold text-lg">{name}</h2>
+      <h3 className="text-sm text-gray-600">{cuisines.join(", ")}</h3>
+      <h4 className="text-sm text-gray-600">{rating} stars</h4>
+    </div>
+  );
+};
+
+
+export const withWrapper = ( Component) => {
+
+  return (props) => {
+    return (
+      <>
+        <label className=" absolute bg-black text-white p-2 m-2 ">Promoted</label>
+        <Component {...props} />
+      </>
+    );
+  }
+}
+
+
+Calling wrapped or normal component based on the promoted flag - 
+
+  <div className="flex flex-wrap justify-center">
+        {filteredRestaurant.length == 0 ? (
+          <h1>no data found</h1>
+        ) : (
+          filteredRestaurant.map((restaurant) => {
+            return <Link to={`/restaurant/${restaurant.restId}`} key={restaurant.restId}>
+
+              {restaurant.promoted ? withWrapper(RestaurantCard)(restaurant) : <RestaurantCard {...restaurant} />}</Link>;
+          })
+        )}
+      </div>
+    </>
+  );
+  
+  
+Other Examples - 
+
+Example 1: Logger HOC with Arrow Functions
+import React from "react";
+
+// Higher Order Component (arrow function)
+const withLogger = (WrappedComponent) => (props) => {
+  console.log("Props received:", props);
+  return <WrappedComponent {...props} />;
+};
+
+// Normal functional component (arrow function)
+const User = ({ name }) => <h2>Hello, {name} 👋</h2>;
+
+// Wrap with HOC
+const UserWithLogger = withLogger(User);
+
+const App = () => <UserWithLogger name="DJ" />;
+
+export default App;
+
+Example 2: Authentication HOC with Arrow Functions
+import React from "react";
+
+// Higher Order Component
+const withAuth = (WrappedComponent) => (props) => {
+  const isLoggedIn = false; // mock condition
+
+  return isLoggedIn 
+    ? <WrappedComponent {...props} /> 
+    : <h2>🚫 Please login to continue</h2>;
+};
+
+// Normal component
+const Dashboard = () => <h1>Welcome to Dashboard 🚀</h1>;
+
+// Wrap with HOC
+const ProtectedDashboard = withAuth(Dashboard);
+
+const App = () => <ProtectedDashboard />;
+
+export default App;
+
+Example 3: Loader HOC (Real-World)
+import React from "react";
+
+// HOC for loading state
+const withLoader = (WrappedComponent) => ({ isLoading, ...props }) => {
+  return isLoading 
+    ? <h3>⏳ Loading...</h3> 
+    : <WrappedComponent {...props} />;
+};
+
+// Functional component
+const Profile = ({ name }) => <h2>Profile: {name}</h2>;
+
+// Wrap with HOC
+const ProfileWithLoader = withLoader(Profile);
+
+const App = () => (
+  <>
+    <ProfileWithLoader isLoading={true} name="DJ" />
+    <ProfileWithLoader isLoading={false} name="DJ" />
+  </>
+);
+
+export default App;
+
+
+React app has -
+
+Data layer - this contains fetching data, storing data and Updating UI when data changes.
+
+UI layer - All elements present on screen are the part of this layer like buttons, texts, links forms and other UI elements.
+
+
+Controlled and Uncontrolled components - 
+
+
+Controlled Components
+
+A controlled component is one where React controls the value of the input field.
+
+The value of the form element (input, textarea, select) is kept in React state, and the UI always reflects that state.
+
+You need to use onChange to update the state whenever the user types.
+
+👉 Example:
+
+import { useState } from "react";
+
+const ControlledInput = () => {
+  const [name, setName] = useState("");
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={name}                // controlled by React state
+        onChange={(e) => setName(e.target.value)} // updates state
+      />
+      <p>Your name: {name}</p>
+    </div>
+  );
+};
+
+export default ControlledInput;
+
+
+Here:
+
+The input’s value is always equal to name state.
+
+If React state changes, input updates automatically.
+
+✅ Advantages:
+
+Full control over user input.
+
+Easier validation (you always know the current value).
+
+Useful for conditional rendering or live previews.
+
+🌾 Uncontrolled Components
+
+An uncontrolled component is one where the DOM itself keeps the form value, not React.
+
+Instead of keeping input value in state, you use a ref to read it when needed.
+
+👉 Example:
+
+import { useRef } from "react";
+
+const UncontrolledInput = () => {
+  const inputRef = useRef(null);
+
+  const handleSubmit = () => {
+    alert(`Your name: ${inputRef.current.value}`);
+  };
+
+  return (
+    <div>
+      <input type="text" ref={inputRef} />  {/* value stored in DOM */}
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  );
+};
+
+export default UncontrolledInput;
+
+
+Here:
+
+React doesn’t care about the input’s current value.
+
+You only read it directly from the DOM when needed.
+
+✅ Advantages:
+
+Less code for simple cases.
+
+Good if you don’t need to update UI live while typing.
+
+🌟 Key Differences
+
+Controlled: React state is the “single source of truth”. Input mirrors state.
+
+Uncontrolled: DOM manages the state. React just reads it when required.
+
+Controlled = more React-y, better for validation.
+
+Uncontrolled = simpler, but less flexible.
+
+⚡ Rule of thumb:
+
+If you need real-time validation, conditional UI, or dynamic behavior, go with Controlled.
+
+If you only need the value once (like on form submit), Uncontrolled can be fine.
+
+
+Lifting the state up - 
+
+What is "Lifting State Up"?
+
+In React, state belongs to the component that owns it.
+
+Sometimes, two or more sibling components need to share the same state (for example, both need to know a selected value, or one updates and the other reacts).
+
+Instead of duplicating state in each sibling, you move the state up to their closest common parent and pass it down as props.
+
+This process is called “lifting the state up”.
+
+🌾 Example Without Lifting State
+
+Imagine you have two input fields for Celsius and Fahrenheit, and each manages its own state.
+They don’t know about each other:
+
+import { useState } from "react";
+
+const CelsiusInput = () => {
+  const [celsius, setCelsius] = useState("");
+  return (
+    <div>
+      <label>Celsius: </label>
+      <input
+        value={celsius}
+        onChange={(e) => setCelsius(e.target.value)}
+      />
+    </div>
+  );
+};
+
+const FahrenheitInput = () => {
+  const [fahrenheit, setFahrenheit] = useState("");
+  return (
+    <div>
+      <label>Fahrenheit: </label>
+      <input
+        value={fahrenheit}
+        onChange={(e) => setFahrenheit(e.target.value)}
+      />
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <div>
+      <CelsiusInput />
+      <FahrenheitInput />
+    </div>
+  );
+}
+
+
+Here, changing Celsius does not update Fahrenheit, because the state is isolated in each child.
+
+🌟 Lifting State Up
+
+To synchronize them, we lift the state to the parent component, and pass props down.
+
+import { useState } from "react";
+
+// Helper conversion functions
+const toFahrenheit = (c) => (c * 9) / 5 + 32;
+const toCelsius = (f) => ((f - 32) * 5) / 9;
+
+const TemperatureInput = ({ label, value, onChange }) => (
+  <div>
+    <label>{label}: </label>
+    <input value={value} onChange={(e) => onChange(e.target.value)} />
+  </div>
+);
+
+export default function App() {
+  const [temperature, setTemperature] = useState("");
+  const [scale, setScale] = useState("c"); // "c" for Celsius, "f" for Fahrenheit
+
+  const handleCelsiusChange = (value) => {
+    setTemperature(value);
+    setScale("c");
+  };
+
+  const handleFahrenheitChange = (value) => {
+    setTemperature(value);
+    setScale("f");
+  };
+
+  const celsius =
+    scale === "f" ? toCelsius(parseFloat(temperature) || 0) : temperature;
+  const fahrenheit =
+    scale === "c" ? toFahrenheit(parseFloat(temperature) || 0) : temperature;
+
+  return (
+    <div>
+      <TemperatureInput
+        label="Celsius"
+        value={celsius}
+        onChange={handleCelsiusChange}
+      />
+      <TemperatureInput
+        label="Fahrenheit"
+        value={fahrenheit}
+        onChange={handleFahrenheitChange}
+      />
+    </div>
+  );
+}
+
+🔑 Key Points:
+
+State is stored in App (the common parent).
+
+TemperatureInput is now a controlled component that just receives value and onChange props.
+
+When you update one, the parent updates, and then both inputs stay in sync.
+
+🚀 Why do we need this?
+
+Prevents duplication of state.
+
+Ensures single source of truth.
+
+Makes sibling components consistent and synchronized.
+
+
+In project code I have lifted the state up from the RestarurantCategories to the RestaurantMenu to keep only one accordion open at a time.
+
+Props drilling - 
+
+What is Prop Drilling?
+
+Props are the way data flows down from parent to child components in React.
+
+Prop drilling happens when you pass props through multiple levels of components just so a deeply nested child can use them.
+
+👉 The problem: intermediate components don’t need those props themselves, but they still have to accept and forward them. This makes the code harder to maintain.
+
+🌱 Example of Prop Drilling
+
+Imagine you have an App component that holds user data, and you want to display the user’s name in a deeply nested Profile component.
+
+const App = () => {
+  const user = { name: "Alice", age: 25 };
+
+  return <Layout user={user} />;
+};
+
+const Layout = ({ user }) => {
+  return (
+    <div>
+      <Header user={user} />
+      <Content user={user} />
+    </div>
+  );
+};
+
+const Header = ({ user }) => {
+  return (
+    <div>
+      <Navbar user={user} />
+    </div>
+  );
+};
+
+const Navbar = ({ user }) => {
+  return (
+    <div>
+      <Profile user={user} />
+    </div>
+  );
+};
+
+const Profile = ({ user }) => {
+  return <h2>Welcome, {user.name}!</h2>;
+};
+
+export default App;
+
+🪜 What happened here?
+
+user starts in App.
+
+But to reach Profile, it had to be passed through Layout → Header → Navbar.
+
+None of those middle components really need user. They just forward it → that’s prop drilling.
+
+🚨 Problems with Prop Drilling
+
+Cluttered code → intermediate components carry unnecessary props.
+
+Harder to maintain → if you change the prop name/type, you need to update every layer.
+
+Scalability issue → deep trees make this painful.
+
+🌟 How to Avoid Prop Drilling
+
+React Context API
+
+Provides a way to share state globally without passing props manually through every level.
+
+Example with Context:
+
+import { createContext, useContext } from "react";
+
+const UserContext = createContext();
+
+const App = () => {
+  const user = { name: "Alice", age: 25 };
+
+  return (
+    <UserContext.Provider value={user}>
+      <Layout />
+    </UserContext.Provider>
+  );
+};
+
+const Layout = () => <Header />;
+const Header = () => <Navbar />;
+const Navbar = () => <Profile />;
+
+const Profile = () => {
+  const user = useContext(UserContext);
+  return <h2>Welcome, {user.name}!</h2>;
+};
+
+export default App;
+
+
+✅ Now, only Profile accesses user, and intermediate components are clean.
+
+State management libraries (Redux, Zustand, MobX)
+
+Useful when state is large and shared widely.
+
+🔑 Key Takeaway
+
+Prop drilling = passing props through components that don’t need them.
+
+It’s not “bad” for small apps, but in larger apps, it’s better to use Context or a state management solution.
+
+
+
+Context API - 
+
+Why do we need Context API?
+
+Normally in React, data flows top-down via props.
+But if you have deeply nested components, you run into prop drilling (passing props through many layers unnecessarily).
+
+👉 Context API solves this by allowing you to share state globally (or at least within a subtree) without drilling props.
+
+🔎 What is Context API?
+
+It’s a way to create a global data store for React components.
+
+Think of it as a “box” where you keep some values (like user, theme, or language).
+
+Any child component can open the box and read/update values, no matter how deeply nested it is.
+
+🛠 How Context API Works
+
+There are 3 main steps:
+
+Create a Context
+
+import { createContext } from "react";
+
+const UserContext = createContext();
+
+
+Provide the Context (at some parent level)
+
+import { useState } from "react";
+
+const App = () => {
+  const [user, setUser] = useState({ name: "Alice", age: 25 });
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      <Layout />
+    </UserContext.Provider>
+  );
+};
+
+
+Here, value is what you want to share with children.
+
+All components inside <UserContext.Provider> can now access this.
+
+Consume the Context (in any child)
+
+import { useContext } from "react";
+
+const Profile = () => {
+  const { user, setUser } = useContext(UserContext);
+
+  return (
+    <div>
+      <h2>Welcome, {user.name}!</h2>
+      <button onClick={() => setUser({ name: "Bob", age: 30 })}>
+        Change User
+      </button>
+    </div>
+  );
+};
+
+🌟 Full Example
+import React, { createContext, useContext, useState } from "react";
+
+// 1. Create Context
+const UserContext = createContext();
+
+const App = () => {
+  const [user, setUser] = useState({ name: "Alice", age: 25 });
+
+  return (
+    // 2. Provide Context
+    <UserContext.Provider value={{ user, setUser }}>
+      <Layout />
+    </UserContext.Provider>
+  );
+};
+
+const Layout = () => <Header />;
+const Header = () => <Navbar />;
+const Navbar = () => <Profile />;
+
+// 3. Consume Context
+const Profile = () => {
+  const { user, setUser } = useContext(UserContext);
+
+  return (
+    <div>
+      <h2>Welcome, {user.name}!</h2>
+      <button onClick={() => setUser({ name: "Bob", age: 30 })}>
+        Switch User
+      </button>
+    </div>
+  );
+};
+
+export default App;
+
+🚀 When to Use Context API
+
+✅ Great for:
+
+Theme (light/dark)
+
+User authentication data (logged in / logged out)
+
+Language / localization
+
+Global app settings
+
+
+Example 2 - 
+
+Step 1: Create Context (UserContext.js)
+import { createContext } from "react";
+
+const UserContext = createContext({
+  user: null,        // default value
+  setUser: () => {}, // placeholder, will be replaced
+});
+
+export default UserContext;
+
+🟢 Step 2: Provide Data from API (App.js)
+
+We’ll fetch user data from an API (for example: https://jsonplaceholder.typicode.com/users/1) and store it in context.
+
+import React, { useEffect, useState } from "react";
+import UserContext from "./UserContext";
+import Header from "./Header";
+import Profile from "./Profile";
+
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUser = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/users/1");
+      const data = await res.json();
+      setUser(data);
+    };
+
+    fetchUser();
+  }, []);
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      <Header />
+      <Profile />
+    </UserContext.Provider>
+  );
+};
+
+export default App;
+
+🟢 Step 3: Consume Context in Components
+Header.js
+import React, { useContext } from "react";
+import UserContext from "./UserContext";
+
+const Header = () => {
+  const { user } = useContext(UserContext);
+
+  return (
+    <div className="p-4 bg-blue-100 flex justify-between">
+      <h1 className="text-xl font-bold">My App</h1>
+      <p>{user ? `Hello, ${user.name}` : "Loading user..."}</p>
+    </div>
+  );
+};
+
+export default Header;
+
+Profile.js
+import React, { useContext } from "react";
+import UserContext from "./UserContext";
+
+const Profile = () => {
+  const { user } = useContext(UserContext);
+
+  if (!user) return <p>Loading profile...</p>;
+
+  return (
+    <div className="p-4">
+      <h2 className="text-lg font-bold">Profile Info</h2>
+      <p>Name: {user.name}</p>
+      <p>Email: {user.email}</p>
+      <p>City: {user.address.city}</p>
+    </div>
+  );
+};
+
+export default Profile;
+
+⚡ How it works
+
+App fetches user data from backend.
+
+UserContext.Provider makes { user, setUser } available to all children.
+
+Header shows "Hello, Alice" once loaded.
+
+Profile shows detailed user info.
+
+Both Header and Profile stay in sync because they’re reading from the same context state.
+
+Example 3 - Taking the value from user and updating it in the context api in live mode - 
+
+
+UserContext.js
+import { createContext } from "react";
+
+const UserContext = createContext({
+  loggedInUser: "Default User",
+  setUserName: () => {}
+});
+
+export default UserContext;
+
+App.js
+import React, { useState } from "react";
+import UserContext from "./UserContext";
+import Header from "./Header";
+import Profile from "./Profile";
+
+const App = () => {
+  const [userName, setUserName] = useState("Default User");
+
+  return (
+    <UserContext.Provider value={{ loggedInUser: userName, setUserName }}>
+      <div className="p-4">
+        <Header />
+        <Profile />
+      </div>
+    </UserContext.Provider>
+  );
+};
+
+export default App;
+
+Header.js (just displays user)
+import React, { useContext } from "react";
+import UserContext from "./UserContext";
+
+const Header = () => {
+  const { loggedInUser } = useContext(UserContext);
+
+  return (
+    <div className="bg-blue-100 p-4 rounded">
+      <h1 className="text-xl font-bold">Welcome, {loggedInUser}</h1>
+    </div>
+  );
+};
+
+export default Header;
+
+Profile.js (input updates context)
+import React, { useContext } from "react";
+import UserContext from "./UserContext";
+
+const Profile = () => {
+  const { loggedInUser, setUserName } = useContext(UserContext);
+
+  return (
+    <div className="mt-4">
+      <label className="block mb-2 font-semibold">Update Username:</label>
+      <input
+        type="text"
+        value={loggedInUser}
+        onChange={(e) => setUserName(e.target.value)}
+        className="border p-2 rounded w-64"
+      />
+    </div>
+  );
+};
+
+export default Profile;
+
+🔄 How it works
+
+App holds the userName state.
+
+The state + updater function are passed via UserContext.Provider.
+
+Header reads loggedInUser.
+
+Profile has an input bound to the same context state, so changing the input updates the context and re-renders everywhere.
+
+
+Reading Context api value in custom hook - 
+
+useUser.js (custom hook)
+import { useContext } from "react";
+import UserContext from "./UserContext";
+
+const useUser = () => {
+  return useContext(UserContext);
+};
+
+export default useUser;
+
+Usage in Header.js
+import React from "react";
+import useUser from "./useUser";
+
+const Header = () => {
+  const { loggedInUser } = useUser();
+
+  return (
+    <div className="bg-blue-100 p-4 rounded">
+      <h1 className="text-xl font-bold">Welcome, {loggedInUser}</h1>
+    </div>
+  );
+};
+
+export default Header;
+
+Usage in Profile.js
+import React from "react";
+import useUser from "./useUser";
+
+const Profile = () => {
+  const { loggedInUser, setUserName } = useUser();
+
+  return (
+    <div className="mt-4">
+      <label className="block mb-2 font-semibold">Update Username:</label>
+      <input
+        type="text"
+        value={loggedInUser}
+        onChange={(e) => setUserName(e.target.value)}
+        className="border p-2 rounded w-64"
+      />
+    </div>
+  );
+};
+
+export default Profile;
+

@@ -23,7 +23,7 @@ export const withWrapper = ( Component) => {
   return (props) => {
     return (
       <>
-        <label className=" absolute bg-black text-white p-1">Promoted</label>
+        <label className=" absolute bg-black text-white p-2 m-2 ">Promoted</label>
         <Component {...props} />
       </>
     );
