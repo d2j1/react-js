@@ -1,0 +1,53 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+const Title = () => (
+
+  <Link to="/">
+    <img
+      className="w-24   h-24 "
+      alt="food villa logo"
+      src="https://obs.line-scdn.net/0m0339dd5b72513e8a8d6127b836e5ecf1e128f1da5cb7"
+    />
+  </Link>
+);
+
+const Header = () => {
+  const [isLoggedIn, setisLoggedIn] = useState(false);
+
+  return (
+    <div className="bg-pink-50 flex justify-between  shadow-lg px-10 text-lg font-semibold">
+      <Title />
+      <div >
+        <ul className="flex align-middle  gap-8 p-6 ">
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+
+          <li>
+            <Link to="/services">Services</Link>
+          </li>
+
+          <li>
+            <Link to="/about">About us</Link>{" "}
+          </li>
+
+          <li>
+            <Link to="/cart">Cart</Link>
+          </li>
+
+            <li>
+            <Link to="/grocery">Grocery</Link>
+          </li>
+        </ul>
+      </div>
+      {isLoggedIn ? (
+        <button onClick={() => setisLoggedIn(false)}>Login</button>
+      ) : (
+        <button onClick={() => setisLoggedIn(true)}>Log out</button>
+      )}
+    </div>
+  );
+};
+
+export default Header;
