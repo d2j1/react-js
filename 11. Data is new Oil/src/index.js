@@ -27,11 +27,13 @@ const AppLayout = () => {
     setUserName(data.name);
   }, []);
   return (
+    <>
     <UserContext.Provider value={{loggedInUser:userName, setUserName}}>
       <Header />
+    </UserContext.Provider>
       <Outlet />
       <Footer />
-    </UserContext.Provider >
+  </>
   );
 };
 
