@@ -1,0 +1,525 @@
+
+React 12 - Lets build our store
+
+Redux and react are different libraries.
+
+Zustand is lighweight option.
+
+Reducx-toolkit - It latest redux update with easier implementation of the redux functionalities.
+
+
+flow - add to cart button will dispatch the action and then action will call the reducer function which will update the state in the slice of the store (redux store).
+
+And we will use the selector ( subscribing to the store) to read the data from redux store. 
+
+Steps to create redux store in our app - 
+
+- install redux-toolkit and react-redux
+- Build our own store
+- Connect our store to our app
+- create slice
+- dispatch an action
+- read data using selector.
+
+
+
+Store created - 
+import {configureStore} from '@reduxjs/toolkit';
+import cartReducer from './CartSlice';
+
+const appStore = configureStore({
+    reducer:{
+        cart: cartReducer,
+
+    }
+});
+
+export default appStore;
+Connect store to app - 
+
+import { Provider } from "react-redux";
+import appStore from "./utils/appStore";
+
+const AppLayout = () => {
+
+  const [userName, setUserName] = useState("DEfault User");
+
+  useEffect(() => {
+    // API call to check if user is logged in
+    const data = {id: 1, name: "Ankush" };
+    setUserName(data.name);
+  }, []);
+  
+  return (
+    <>
+    <Provider store={appStore}>
+      <Header />
+      <Outlet />
+      <Footer />
+      </Provider>
+  </>
+  );
+};
+
+
+Creating slice - 
+
+import { createSlice } from "@reduxjs/toolkit";
+
+const cartSlice = createSlice({
+    name:"cart", 
+    initialState:{
+        items:["Pizza", "Burger"],
+    }, 
+    reducers:{
+        addItem: (state, action) => {
+            state.items.push(action.payload);
+        },
+
+        removeItem: (state) => {
+            state.items.pop();
+        },
+
+        clearCart: (state) => {
+            state.items.length=0;
+        }
+    }
+});
+
+export const {addItem, removeItem, clearCart} = cartSlice.actions;
+export default cartSlice.reducer;
+
+
+Reading the data from the appStore - 
+
+
+import {useSelector} from "react-redux";
+
+const cartItems = useSelector((store) => store.cart.items);
+
+
+Updating the data in appStore using the dispatcher - 
+
+import { useDispatch } from "react-redux";
+import { addItem } from "../utils/CartSlice";
+
+
+const ItemList = (props) => {
+    const { items } = props;
+
+    const dispatch = useDispatch();
+
+
+    const handleAddToCart = (item) => {
+        // dispatch an action to add item to cart
+       
+        dispatch(addItem(item));
+       
+
+    }
+
+    return (
+        <ul>
+            {items.map((item, index) => (
+                <li key={index}>{item} <button onClick={() => handleAddToCart(item)}>Add +</button></li>
+            ))}
+        </ul>
+    );
+};
+
+export default ItemList;
+
+
+Q - 
+
+what is the difference between - 
+
+<button onClick={handleAddToCart(item)}>Add +</button>
+
+and 
+
+<button onClick={() => handleAddToCart(item)}>Add +</button>
+
+
+1. ❌ onClick={handleAddToCart(item)}
+
+Here you are calling the function immediately while React renders the component.
+
+handleAddToCart(item) runs right away, not when the button is clicked.
+
+Whatever that function returns is what React will try to use as the onClick handler (usually undefined).
+
+This means your function executes on render, not on click.
+
+Example:
+
+function handleAddToCart(item) {
+  console.log("Added:", item);
+}
+
+<button onClick={handleAddToCart(item)}>Add +</button>
+
+
+➡️ You’ll see "Added: item" in the console as soon as the component renders, even before clicking the button.
+
+2. ✅ onClick={() => handleAddToCart(item)}
+
+Here you are passing a function reference (an arrow function).
+
+The arrow function itself is the click handler.
+
+When the button is clicked, React calls that function.
+
+Inside it, you call handleAddToCart(item).
+
+Example:
+
+<button onClick={() => handleAddToCart(item)}>Add +</button>
+
+
+➡️ Now "Added: item" appears only when you click the button.
+
+🔑 Core Difference
+
+onClick={handleAddToCart(item)} → calls immediately during render.
+
+onClick={() => handleAddToCart(item)} → defers the call until click.
+
+
+
+<button onClick={handleAddToCart}>Add +</button>
+
+Here you are passing the function reference directly.
+
+That means:
+
+You are not calling handleAddToCart yet.
+
+React will store this function and call it when the button is clicked.
+
+When React calls it, it automatically passes the event object (SyntheticEvent) as the first argument.
+
+Example:
+
+function handleAddToCart(event) {
+  console.log("Button clicked!");
+  console.log("Event object:", event);
+}
+
+<button onClick={handleAddToCart}>Add +</button>
+
+
+➡️ When you click, "Button clicked!" logs, and you get the event object in console.
+If you didn’t define any parameter in the function, the event is just ignored.
+
+
+Complete flow of fetching the data and updating data in redux store -
+
+1. Redux Store Recap
+
+With Redux Toolkit, you create a store like this:
+
+// store.js
+import { configureStore } from "@reduxjs/toolkit";
+import cartReducer from "./cartSlice";
+
+const store = configureStore({
+  reducer: {
+    cart: cartReducer, // register slice
+  },
+});
+
+export default store;
+
+2. Slice Example
+
+A slice contains state + reducers + actions.
+
+// cartSlice.js
+import { createSlice } from "@reduxjs/toolkit";
+
+const cartSlice = createSlice({
+  name: "cart",
+  initialState: {
+    items: [], // state
+  },
+  reducers: {
+    addToCart: (state, action) => {
+      state.items.push(action.payload); // update state
+    },
+    removeFromCart: (state, action) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
+    },
+  },
+});
+
+export const { addToCart, removeFromCart } = cartSlice.actions;
+export default cartSlice.reducer;
+
+
+Here:
+
+addToCart and removeFromCart are action creators.
+
+They automatically get generated by createSlice.
+
+3. useDispatch
+
+useDispatch is a React hook that lets you send actions to the Redux store.
+Think of it like "Hey store, update yourself".
+
+Example:
+
+import { useDispatch } from "react-redux";
+import { addToCart } from "./cartSlice";
+
+function Product({ product }) {
+  const dispatch = useDispatch();
+
+  return (
+    <button
+      onClick={() => dispatch(addToCart(product))}
+      className="bg-green-500 px-4 py-2 text-white rounded"
+    >
+      Add to Cart
+    </button>
+  );
+}
+
+
+➡️ When you click, dispatch(addToCart(product)) sends an action to the store, and the reducer updates the state.
+
+4. useSelector
+
+useSelector is a React hook to read (fetch) data from the Redux store.
+Think of it like "Hey store, give me the current value".
+
+Example:
+
+import { useSelector } from "react-redux";
+
+function Cart() {
+  const cartItems = useSelector((state) => state.cart.items);
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold">Cart</h2>
+      {cartItems.map((item) => (
+        <p key={item.id}>{item.name}</p>
+      ))}
+    </div>
+  );
+}
+
+
+➡️ This reads state.cart.items from the store and re-renders the component whenever it changes.
+
+5. Full Flow (Update + Fetch)
+
+User clicks Add to Cart button → calls dispatch(addToCart(product))
+
+cartSlice reducer updates the state
+
+Cart component re-renders automatically because useSelector is subscribed to that part of the store.
+
+6. Summary
+
+useDispatch → Send actions to update the store.
+
+useSelector → Fetch state values from the store.
+
+Redux automatically re-renders components that use useSelector whenever that state changes.
+
+
+Best practices - 
+
+Always subscribe to the specific slice from the store, subscribing to the entire store causes performance issues.
+
+
+Immer library - 
+
+1. The Problem Without Immer
+
+In Redux, state must always be immutable (not modified directly).
+
+Example: If you had a cart reducer like this:
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case "add":
+      state.items.push(action.payload); // ❌ this mutates state
+      return state;
+  }
+}
+
+
+This is wrong because Redux requires you to create a new state object every time. The correct way would be:
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case "add":
+      return {
+        ...state,
+        items: [...state.items, action.payload],
+      }; // ✅ new state created
+  }
+}
+
+
+This gets messy very quickly, especially for deeply nested state.
+
+2. What Immer Does
+
+Immer lets you write code as if you’re mutating state directly, but behind the scenes it:
+
+Tracks all the changes you make.
+
+Produces a brand-new immutable state.
+
+Leaves the old state untouched (needed for Redux history, time-travel debugging, etc.).
+
+So with Redux Toolkit:
+
+addToCart: (state, action) => {
+  state.items.push(action.payload); // looks like mutation
+}
+
+
+➡️ Immer intercepts this and safely converts it into an immutable update.
+
+3. Why It’s Important
+
+Cleaner code → You don’t have to manually copy objects/arrays.
+
+Less bug-prone → No risk of mutating state directly.
+
+Faster development → Focus on logic, not immutability boilerplate.
+
+Time travel debugging works → Old states are preserved.
+
+4. Tiny Example
+
+Without Immer (vanilla Redux):
+
+return {
+  ...state,
+  user: {
+    ...state.user,
+    profile: {
+      ...state.user.profile,
+      name: action.payload,
+    },
+  },
+};
+
+
+With Immer (Redux Toolkit):
+
+updateName: (state, action) => {
+  state.user.profile.name = action.payload; // Immer handles immutability
+}
+
+
+Mutation - 
+
+
+1. What is Mutation?
+
+👉 Mutation = directly changing (modifying) an existing object or array in memory.
+
+Example:
+
+let arr = [1, 2, 3];
+arr.push(4); // MUTATION — arr is now changed to [1, 2, 3, 4]
+
+
+Another one with objects:
+
+let user = { name: "Alice" };
+user.name = "Bob"; // MUTATION — user object is modified directly
+
+
+Here, you are not creating a new object; you are changing the existing one.
+
+2. Why Mutation is a Problem in React/Redux
+
+React and Redux rely on immutability (no mutation) to know when to update the UI.
+
+React uses shallow comparison (checking if references changed) to decide if a component should re-render.
+
+Redux uses immutability so old states are preserved (time-travel debugging, undo/redo, etc.).
+
+If you mutate state directly, React/Redux may not detect the change.
+
+Example in Redux:
+const initialState = { items: [] };
+
+function reducer(state = initialState, action) {
+  if (action.type === "add") {
+    state.items.push(action.payload);  // ❌ mutation
+    return state;
+  }
+  return state;
+}
+
+
+The array state.items is modified in place.
+
+Redux doesn’t see a "new state object" because the reference to state hasn’t changed.
+
+UI may not update.
+
+3. Correct (Immutable) Way
+
+Instead of modifying the same object/array, create a new one.
+
+function reducer(state = initialState, action) {
+  if (action.type === "add") {
+    return {
+      ...state,
+      items: [...state.items, action.payload], // ✅ new array
+    };
+  }
+  return state;
+}
+
+
+Here:
+
+A new items array is created.
+
+A new state object is returned.
+
+React/Redux can detect that state has changed.
+
+4. Immer + Redux Toolkit
+
+Manually writing immutable updates is painful. That’s why Immer is bundled into Redux Toolkit.
+
+With Immer, you can write this:
+
+addToCart: (state, action) => {
+  state.items.push(action.payload); // ✅ looks like mutation, but Immer makes it immutable
+}
+
+
+Behind the scenes:
+
+Immer creates a draft copy of the state.
+
+Tracks your changes.
+
+Produces a new immutable state.
+
+Keeps the old state untouched.
+
+5. Simple Analogy
+
+Mutation: Erasing and rewriting directly in your notebook. Old notes are gone.
+
+Immutable update: Photocopy the notebook, make edits in the copy, and keep the old one safe.
+
+Redux always wants the "photocopy" approach.
+
+Redux devtools extension to debug the react application.
+
