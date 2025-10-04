@@ -12,6 +12,8 @@ import RestaurantMenu from "./components/RestaurantMenu";
 import { lazy, Suspense } from "react";
 import UserContext from "./utils/UserContext";
 import { Provider } from "react-redux";
+import appStore from "../../12. Lets build our store/src/utils/appStore";
+
 
 const Grocery = lazy(() => import( "./components/Grocery"));
 
@@ -28,11 +30,13 @@ const AppLayout = () => {
   }, []);
   return (
     <>
+    <Provider store={appStore}>
     <UserContext.Provider value={{loggedInUser:userName, setUserName}}>
       <Header />
     </UserContext.Provider>
       <Outlet />
       <Footer />
+      </Provider>
   </>
   );
 };
