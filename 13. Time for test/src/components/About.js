@@ -7,8 +7,10 @@ const About = () => {
     <div>
       <h1> About us page</h1>
       <p> This is namaste react about page of the course</p>
-      <User name="DJ (functional)" />
-      <UserClass name="DJ (Class)" />
+      <button>Click Me</button>
+      <button>Click Me 2</button>
+      {/* <User name="DJ (functional)" />
+      <UserClass name="DJ (Class)" /> */}
     </div>
   );
 };

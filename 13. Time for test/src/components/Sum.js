@@ -1,5 +1,7 @@
 
 
-export const Sum = ({ a, b }) => {
+const Sum = ({ a, b }) => {
   return a + b;
 }   
+
+export default Sum;
