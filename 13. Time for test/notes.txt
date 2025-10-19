@@ -1,525 +1,616 @@
 
-React 12 - Lets build our store
-
-Redux and react are different libraries.
-
-Zustand is lighweight option.
-
-Reducx-toolkit - It latest redux update with easier implementation of the redux functionalities.
+React 13 - Time to test
 
 
-flow - add to cart button will dispatch the action and then action will call the reducer function which will update the state in the slice of the store (redux store).
+Types of testing - (Developer) 
 
-And we will use the selector ( subscribing to the store) to read the data from redux store. 
-
-Steps to create redux store in our app - 
-
-- install redux-toolkit and react-redux
-- Build our own store
-- Connect our store to our app
-- create slice
-- dispatch an action
-- read data using selector.
+unit testing - Test react component in isolation.
 
 
+Integration testing -
+test communication between the mulitple components.
 
-Store created - 
-import {configureStore} from '@reduxjs/toolkit';
-import cartReducer from './CartSlice';
+End to end testing.
 
-const appStore = configureStore({
-    reducer:{
-        cart: cartReducer,
 
-    }
+Libraries used for testing  -
+
+React testing library - It is built on top of DOM testing library by adding APIs for working with react components.
+
+React testing library also uses the jest behind the scenes.
+
+
+install libraries - 
+
+
+npm i -D @testing-library/react
+
+
+npm i -D @testing-library/react
+
+
+npm i -D jest
+
+
+we are also using babel so we need to install below libraries - 
+
+npm install --save-dev babel-jest @babel/core @babel/preset-env
+
+and we will have to configure the babel - 
+
+create babel.config.js file and put below config in it - 
+
+
+module.exports = {
+  presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
+};
+
+
+
+Parcel uses babel behind the scenes and it has its own configuration defined for babel. So this above configuration will overide the parcels internal configuraiton, to avoid this configuration override issue we will create new .parcelrc file  and new config to disable babel transpilation.
+
+
+ref - https://parceljs.org/languages/javascript/#babel
+
+
+create below file at root - 
+
+.parcelrc
+
+content of above file - 
+
+{
+  "extends": "@parcel/config-default",
+  "transformers": {
+    "*.{js,mjs,jsx,cjs,ts,tsx}": [
+      "@parcel/transformer-js",
+      "@parcel/transformer-react-refresh-wrap"
+    ]
+  }
+}
+
+
+
+run below command to start the testing - 
+
+npm run test 
+
+
+
+above command should give no tests found error as there are no test cases written.
+
+
+
+To write test cases run below command - 
+
+npx create jest 
+
+while running above cmd, select below options - 
+
+Ok to proceed -> Y
+
+would you like to use TypeScript for config file -> No
+
+choose test environment - select jsdom option.
+
+Reports -> Yes
+
+which provider should be used to instrument code for coverage -> babel
+
+
+Now install jsdom - 
+
+npm install --save-dev jest-environment-jsdom
+
+
+
+Write test cases - 
+
+
+create __tests__ folder inside components folder and we will write all the test case files in this folder.
+
+We can create __tests__ folder anywhere in our project still it will work.
+
+or we can just create file with below naming format to write the test cases anywhere in our project, it will also work.
+
+
+Cart.test.js
+Cart.test.ts
+Cart.spec.js
+Cart.spec.ts
+
+
+
+
+To test Sum component - we have created __tests__ folder inside components folder and in this folder we have created sum.test.js file to write the test cases of sum component.
+
+sum.test.js - 
+
+
+import { expect, test } from "@jest/globals";
+import Sum from "../Sum";
+
+
+test("Sum function should calculate the sum of two numbers", () => {
+    
+    expect(Sum({ a: 3, b: 5 })).toBe(8);
+    expect(Sum({ a: -3, b: 3 })).toBe(0);
+    expect(Sum({ a: -3, b: -6 })).toBe(-9);
 });
 
-export default appStore;
-Connect store to app - 
+test("Sum function should calculate the sum of two numbers", () => {
+    
+    expect(Sum({ a: 3, b: 5 })).toBe(9);
+    expect(Sum({ a: -3, b: 3 })).toBe(0);
+    expect(Sum({ a: -3, b: -6 })).toBe(-9);
+});
 
+
+Use below command to run the test cases - 
+
+npm run test
+
+
+Test whether component is rendered or not - 
+
+install below library to add support of jsx in the test cases - 
+
+npm install @babel/preset-react
+
+and add below config in babel.config.js file - 
+
+module.exports = {
+  presets: [['@babel/preset-env', {targets: {node: 'current'}}],
+ ["@babel/preset-react", { runtime: "automatic" }]],
+  
+};
+
+
+npm install --save-dev @testing-library/jest-dom
+
+
+Test cases - 
+
+about.test.js - 
+
+
+
+import { describe, expect, test } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+
+
+import About from "../About";
+
+
+  test("About component should render correctly", () => {
+  const { getByText } = render(<About />);
+  expect(getByText("About us page")).toBeInTheDocument(); 
+});
+
+test("About component should have correct content", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+test("About component should have button", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+
+
+test("About component should have correct paragraph", () => {
+  render(<About />);
+  const paragraph = screen.getByText("This is namaste react about page of the course");
+  expect(paragraph).toBeInTheDocument();
+});
+
+test("About component should have 2 buttons", () => {
+  render(<About />);
+    
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+We can grounp the test cases positive test cases, negative test cases etc by using describe - 
+
+
+import { describe, expect, test } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+
+
+import About from "../About";
+
+
+
+
+describe("About Component Tests", () => {
+  test("About component should render correctly", () => {
+  const { getByText } = render(<About />);
+  expect(getByText("About us page")).toBeInTheDocument(); 
+});
+
+test("About component should have correct content", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+test("About component should have button", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+
+
+test("About component should have correct paragraph", () => {
+  render(<About />);
+  const paragraph = screen.getByText("This is namaste react about page of the course");
+  expect(paragraph).toBeInTheDocument();
+});
+
+test("About component should have 2 buttons", () => {
+  render(<About />);
+    
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+});
+
+
+
+In header component we have used redux store and react router, while testing header we need to provide these depedencies shown below - 
+
+
+Header.test.js - 
+
+import { render, screen } from "@testing-library/react";
+import Header from "../Header";
+import "@testing-library/jest-dom";
+import { describe, expect, test } from "@jest/globals";
 import { Provider } from "react-redux";
-import appStore from "./utils/appStore";
+import appStore from "../../utils/appStore";
+import { BrowserRouter } from "react-router-dom";
 
-const AppLayout = () => {
+test("Header component should render correctly", () => {
 
-  const [userName, setUserName] = useState("DEfault User");
+    render(
+    <BrowserRouter>
+    <Provider store={appStore}>
+    <Header />
+    </Provider>
+    </BrowserRouter>
+);
+    const headerElement = screen.getByText("Home");
+    expect(headerElement).toBeInTheDocument();
+});
+
+
+
+test("Header component has Login and logout button", () => {
+
+    render(
+    <BrowserRouter>
+    <Provider store={appStore}>
+    <Header />
+    </Provider>
+    </BrowserRouter>
+);
+    const loginBtn = screen.getByRole("button", {  name: "Login"});
+    expect(loginBtn).toBeInTheDocument();
+
+    loginBtn.click();
+
+    const logoutBtn = screen.getByRole("button", {  name: "-- Log out"});
+    expect(logoutBtn).toBeInTheDocument();
+});
+
+
+
+Mocking - 
+
+
+
+// src/components/UserProfile.jsx
+import React, { useEffect, useState } from "react";
+
+function UserProfile({ username }) {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // API call to check if user is logged in
-    const data = {id: 1, name: "Ankush" };
-    setUserName(data.name);
-  }, []);
-  
-  return (
-    <>
-    <Provider store={appStore}>
-      <Header />
-      <Outlet />
-      <Footer />
-      </Provider>
-  </>
-  );
-};
-
-
-Creating slice - 
-
-import { createSlice } from "@reduxjs/toolkit";
-
-const cartSlice = createSlice({
-    name:"cart", 
-    initialState:{
-        items:["Pizza", "Burger"],
-    }, 
-    reducers:{
-        addItem: (state, action) => {
-            state.items.push(action.payload);
-        },
-
-        removeItem: (state) => {
-            state.items.pop();
-        },
-
-        clearCart: (state) => {
-            state.items.length=0;
-        }
-    }
-});
-
-export const {addItem, removeItem, clearCart} = cartSlice.actions;
-export default cartSlice.reducer;
-
-
-Reading the data from the appStore - 
-
-
-import {useSelector} from "react-redux";
-
-const cartItems = useSelector((store) => store.cart.items);
-
-
-Updating the data in appStore using the dispatcher - 
-
-import { useDispatch } from "react-redux";
-import { addItem } from "../utils/CartSlice";
-
-
-const ItemList = (props) => {
-    const { items } = props;
-
-    const dispatch = useDispatch();
-
-
-    const handleAddToCart = (item) => {
-        // dispatch an action to add item to cart
-       
-        dispatch(addItem(item));
-       
-
+    async function fetchUser() {
+      try {
+        const res = await fetch(`https://api.github.com/users/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        setError(err.message);
+      }
     }
 
-    return (
-        <ul>
-            {items.map((item, index) => (
-                <li key={index}>{item} <button onClick={() => handleAddToCart(item)}>Add +</button></li>
-            ))}
-        </ul>
-    );
-};
-
-export default ItemList;
-
-
-Q - 
-
-what is the difference between - 
-
-<button onClick={handleAddToCart(item)}>Add +</button>
-
-and 
-
-<button onClick={() => handleAddToCart(item)}>Add +</button>
-
-
-1. ❌ onClick={handleAddToCart(item)}
-
-Here you are calling the function immediately while React renders the component.
-
-handleAddToCart(item) runs right away, not when the button is clicked.
-
-Whatever that function returns is what React will try to use as the onClick handler (usually undefined).
-
-This means your function executes on render, not on click.
-
-Example:
-
-function handleAddToCart(item) {
-  console.log("Added:", item);
-}
-
-<button onClick={handleAddToCart(item)}>Add +</button>
-
-
-➡️ You’ll see "Added: item" in the console as soon as the component renders, even before clicking the button.
-
-2. ✅ onClick={() => handleAddToCart(item)}
-
-Here you are passing a function reference (an arrow function).
-
-The arrow function itself is the click handler.
-
-When the button is clicked, React calls that function.
-
-Inside it, you call handleAddToCart(item).
-
-Example:
-
-<button onClick={() => handleAddToCart(item)}>Add +</button>
-
-
-➡️ Now "Added: item" appears only when you click the button.
-
-🔑 Core Difference
-
-onClick={handleAddToCart(item)} → calls immediately during render.
-
-onClick={() => handleAddToCart(item)} → defers the call until click.
-
-
-
-<button onClick={handleAddToCart}>Add +</button>
-
-Here you are passing the function reference directly.
-
-That means:
-
-You are not calling handleAddToCart yet.
-
-React will store this function and call it when the button is clicked.
-
-When React calls it, it automatically passes the event object (SyntheticEvent) as the first argument.
-
-Example:
-
-function handleAddToCart(event) {
-  console.log("Button clicked!");
-  console.log("Event object:", event);
-}
-
-<button onClick={handleAddToCart}>Add +</button>
-
-
-➡️ When you click, "Button clicked!" logs, and you get the event object in console.
-If you didn’t define any parameter in the function, the event is just ignored.
-
-
-Complete flow of fetching the data and updating data in redux store -
-
-1. Redux Store Recap
-
-With Redux Toolkit, you create a store like this:
-
-// store.js
-import { configureStore } from "@reduxjs/toolkit";
-import cartReducer from "./cartSlice";
-
-const store = configureStore({
-  reducer: {
-    cart: cartReducer, // register slice
-  },
-});
-
-export default store;
-
-2. Slice Example
-
-A slice contains state + reducers + actions.
-
-// cartSlice.js
-import { createSlice } from "@reduxjs/toolkit";
-
-const cartSlice = createSlice({
-  name: "cart",
-  initialState: {
-    items: [], // state
-  },
-  reducers: {
-    addToCart: (state, action) => {
-      state.items.push(action.payload); // update state
-    },
-    removeFromCart: (state, action) => {
-      state.items = state.items.filter((item) => item.id !== action.payload);
-    },
-  },
-});
-
-export const { addToCart, removeFromCart } = cartSlice.actions;
-export default cartSlice.reducer;
-
-
-Here:
-
-addToCart and removeFromCart are action creators.
-
-They automatically get generated by createSlice.
-
-3. useDispatch
-
-useDispatch is a React hook that lets you send actions to the Redux store.
-Think of it like "Hey store, update yourself".
-
-Example:
-
-import { useDispatch } from "react-redux";
-import { addToCart } from "./cartSlice";
-
-function Product({ product }) {
-  const dispatch = useDispatch();
-
-  return (
-    <button
-      onClick={() => dispatch(addToCart(product))}
-      className="bg-green-500 px-4 py-2 text-white rounded"
-    >
-      Add to Cart
-    </button>
-  );
-}
-
-
-➡️ When you click, dispatch(addToCart(product)) sends an action to the store, and the reducer updates the state.
-
-4. useSelector
-
-useSelector is a React hook to read (fetch) data from the Redux store.
-Think of it like "Hey store, give me the current value".
-
-Example:
-
-import { useSelector } from "react-redux";
-
-function Cart() {
-  const cartItems = useSelector((state) => state.cart.items);
+    fetchUser();
+  }, [username]);
+
+  if (error) return <p role="alert">Error: {error}</p>;
+  if (!user) return <p>Loading...</p>;
 
   return (
     <div>
-      <h2 className="text-xl font-bold">Cart</h2>
-      {cartItems.map((item) => (
-        <p key={item.id}>{item.name}</p>
-      ))}
+      <h1 data-testid="name">{user.name}</h1>
+      <p data-testid="bio">{user.bio}</p>
     </div>
   );
 }
 
-
-➡️ This reads state.cart.items from the store and re-renders the component whenever it changes.
-
-5. Full Flow (Update + Fetch)
-
-User clicks Add to Cart button → calls dispatch(addToCart(product))
-
-cartSlice reducer updates the state
-
-Cart component re-renders automatically because useSelector is subscribed to that part of the store.
-
-6. Summary
-
-useDispatch → Send actions to update the store.
-
-useSelector → Fetch state values from the store.
-
-Redux automatically re-renders components that use useSelector whenever that state changes.
+export default UserProfile;
 
 
-Best practices - 
 
-Always subscribe to the specific slice from the store, subscribing to the entire store causes performance issues.
+Test cases - 
 
 
-Immer library - 
+// src/components/__tests__/UserProfile.test.js
+import React from "react";
+import { render, screen, act } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import UserProfile from "../UserProfile";
 
-1. The Problem Without Immer
+// 🌟 Global fetch mock
+global.fetch = jest.fn();
 
-In Redux, state must always be immutable (not modified directly).
+beforeEach(() => {
+  fetch.mockClear(); // reset between tests
+});
 
-Example: If you had a cart reducer like this:
+test("displays loading state initially", async () => {
+  await act(async () => {
+    render(<UserProfile username="d2j1" />);
+  });
+  expect(screen.getByText("Loading...")).toBeInTheDocument();
+});
 
-function cartReducer(state, action) {
-  switch (action.type) {
-    case "add":
-      state.items.push(action.payload); // ❌ this mutates state
-      return state;
-  }
+test("renders user data when fetch succeeds", async () => {
+  const mockUser = { name: "DJ", bio: "Java Developer" };
+
+  fetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => mockUser,
+  });
+
+  await act(async () => {
+    render(<UserProfile username="d2j1" />);
+  });
+
+  // Wait for the state update after fetch resolves
+  await act(async () => {
+    // flush promises
+    await Promise.resolve();
+  });
+
+  expect(screen.getByTestId("name")).toHaveTextContent("DJ");
+  expect(screen.getByTestId("bio")).toHaveTextContent("Java Developer");
+});
+
+test("renders error message when fetch fails", async () => {
+  fetch.mockResolvedValueOnce({ ok: false });
+
+  await act(async () => {
+    render(<UserProfile username="invalidUser" />);
+  });
+
+  // Wait for state update
+  await act(async () => {
+    await Promise.resolve();
+  });
+
+  expect(screen.getByRole("alert")).toHaveTextContent("Failed to fetch");
+});
+
+
+Testing search component - 
+
+Search.jsx - 
+
+
+// src/components/Search.jsx
+import React, { useState } from "react";
+
+function Search({ onSearch }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+
+  const handleSearch = async () => {
+    const res = await onSearch(query); // calling parent/mock function
+    setResults(res);
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        data-testid="search-input"
+      />
+      <button onClick={handleSearch} data-testid="search-button">
+        Search
+      </button>
+      <ul data-testid="results-list">
+        {results.map((item, idx) => (
+          <li key={idx}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
+export default Search;
 
-This is wrong because Redux requires you to create a new state object every time. The correct way would be:
 
-function cartReducer(state, action) {
-  switch (action.type) {
-    case "add":
-      return {
-        ...state,
-        items: [...state.items, action.payload],
-      }; // ✅ new state created
-  }
-}
 
+Test cases - 
 
-This gets messy very quickly, especially for deeply nested state.
 
-2. What Immer Does
+import React from "react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import Search from "../Search";
 
-Immer lets you write code as if you’re mutating state directly, but behind the scenes it:
+describe("Search component", () => {
+  const mockSearch = jest.fn();
 
-Tracks all the changes you make.
+  beforeEach(() => {
+    mockSearch.mockClear();
+  });
 
-Produces a brand-new immutable state.
+  test("renders input and button", () => {
+    render(<Search onSearch={mockSearch} />);
+    expect(screen.getByTestId("search-input")).toBeInTheDocument();
+    expect(screen.getByTestId("search-button")).toBeInTheDocument();
+  });
 
-Leaves the old state untouched (needed for Redux history, time-travel debugging, etc.).
+  test("allows user to type in input", () => {
+    render(<Search onSearch={mockSearch} />);
+    const input = screen.getByTestId("search-input");
+    fireEvent.change(input, { target: { value: "apple" } });
+    expect(input.value).toBe("apple");
+  });
 
-So with Redux Toolkit:
+  test("calls onSearch and displays results", async () => {
+    const results = ["apple", "apricot"];
+    mockSearch.mockResolvedValueOnce(results);
 
-addToCart: (state, action) => {
-  state.items.push(action.payload); // looks like mutation
-}
+    render(<Search onSearch={mockSearch} />);
 
+    const input = screen.getByTestId("search-input");
+    const button = screen.getByTestId("search-button");
 
-➡️ Immer intercepts this and safely converts it into an immutable update.
+    // Type query
+    fireEvent.change(input, { target: { value: "ap" } });
+    expect(input.value).toBe("ap");
 
-3. Why It’s Important
+    // Click search
+    await act(async () => {
+      fireEvent.click(button);
+    });
 
-Cleaner code → You don’t have to manually copy objects/arrays.
+    // Wait for results to update
+    await act(async () => {
+      await Promise.resolve();
+    });
 
-Less bug-prone → No risk of mutating state directly.
+    const listItems = screen.getAllByRole("listitem"); // this will all the li element from the page.
+	
+	
+    expect(listItems).toHaveLength(2);
+    expect(listItems[0]).toHaveTextContent("apple");
+    expect(listItems[1]).toHaveTextContent("apricot");
 
-Faster development → Focus on logic, not immutability boilerplate.
+    // Ensure onSearch was called with correct query
+    expect(mockSearch).toHaveBeenCalledWith("ap");
+  });
+});
 
-Time travel debugging works → Old states are preserved.
 
-4. Tiny Example
 
-Without Immer (vanilla Redux):
+BeforeEach, BeforeAll, AfterEach, AfterAll - 
 
-return {
-  ...state,
-  user: {
-    ...state.user,
-    profile: {
-      ...state.user.profile,
-      name: action.payload,
-    },
-  },
-};
+beforeAll
 
+Runs once before all tests in a file or describe block.
 
-With Immer (Redux Toolkit):
+Useful for expensive setup that you only want to do once, like connecting to a database or starting a server.
 
-updateName: (state, action) => {
-  state.user.profile.name = action.payload; // Immer handles immutability
-}
+beforeAll(() => {
+  console.log("Runs once before all tests");
+});
 
+2️⃣ beforeEach
 
-Mutation - 
+Runs before each individual test.
 
+Useful to reset mocks, render components freshly, or prepare the test environment.
 
-1. What is Mutation?
+beforeEach(() => {
+  console.log("Runs before every test");
+});
 
-👉 Mutation = directly changing (modifying) an existing object or array in memory.
+3️⃣ afterEach
 
-Example:
+Runs after each individual test.
 
-let arr = [1, 2, 3];
-arr.push(4); // MUTATION — arr is now changed to [1, 2, 3, 4]
+Useful for cleanup: clearing mocks, removing elements from DOM, resetting global variables.
 
+afterEach(() => {
+  console.log("Runs after every test");
+});
 
-Another one with objects:
+4️⃣ afterAll
 
-let user = { name: "Alice" };
-user.name = "Bob"; // MUTATION — user object is modified directly
+Runs once after all tests in a file or describe block.
 
+Useful to close connections, servers, or clean up resources that were created in beforeAll.
 
-Here, you are not creating a new object; you are changing the existing one.
+afterAll(() => {
+  console.log("Runs once after all tests");
+});
 
-2. Why Mutation is a Problem in React/Redux
 
-React and Redux rely on immutability (no mutation) to know when to update the UI.
+Example - 
 
-React uses shallow comparison (checking if references changed) to decide if a component should re-render.
+describe("Math tests", () => {
+  beforeAll(() => console.log("Math: beforeAll - runs once before all math tests"));
+  beforeEach(() => console.log("Math: beforeEach - runs before each math test"));
+  afterEach(() => console.log("Math: afterEach - runs after each math test"));
+  afterAll(() => console.log("Math: afterAll - runs once after all math tests"));
 
-Redux uses immutability so old states are preserved (time-travel debugging, undo/redo, etc.).
+  test("1 + 1 = 2", () => {
+    console.log("Running math test 1");
+    expect(1 + 1).toBe(2);
+  });
 
-If you mutate state directly, React/Redux may not detect the change.
+  test("2 + 2 = 4", () => {
+    console.log("Running math test 2");
+    expect(2 + 2).toBe(4);
+  });
+});
 
-Example in Redux:
-const initialState = { items: [] };
+describe("String tests", () => {
+  beforeAll(() => console.log("String: beforeAll - runs once before all string tests"));
+  beforeEach(() => console.log("String: beforeEach - runs before each string test"));
+  afterEach(() => console.log("String: afterEach - runs after each string test"));
+  afterAll(() => console.log("String: afterAll - runs once after all string tests"));
 
-function reducer(state = initialState, action) {
-  if (action.type === "add") {
-    state.items.push(action.payload);  // ❌ mutation
-    return state;
-  }
-  return state;
-}
+  test('"abc".toUpperCase', () => {
+    console.log("Running string test 1");
+    expect("abc".toUpperCase()).toBe("ABC");
+  });
 
+  test('"hello".length', () => {
+    console.log("Running string test 2");
+    expect("hello".length).toBe(5);
+  });
+});
 
-The array state.items is modified in place.
 
-Redux doesn’t see a "new state object" because the reference to state hasn’t changed.
 
-UI may not update.
-
-3. Correct (Immutable) Way
-
-Instead of modifying the same object/array, create a new one.
-
-function reducer(state = initialState, action) {
-  if (action.type === "add") {
-    return {
-      ...state,
-      items: [...state.items, action.payload], // ✅ new array
-    };
-  }
-  return state;
-}
-
-
-Here:
-
-A new items array is created.
-
-A new state object is returned.
-
-React/Redux can detect that state has changed.
-
-4. Immer + Redux Toolkit
-
-Manually writing immutable updates is painful. That’s why Immer is bundled into Redux Toolkit.
-
-With Immer, you can write this:
-
-addToCart: (state, action) => {
-  state.items.push(action.payload); // ✅ looks like mutation, but Immer makes it immutable
-}
-
-
-Behind the scenes:
-
-Immer creates a draft copy of the state.
-
-Tracks your changes.
-
-Produces a new immutable state.
-
-Keeps the old state untouched.
-
-5. Simple Analogy
-
-Mutation: Erasing and rewriting directly in your notebook. Old notes are gone.
-
-Immutable update: Photocopy the notebook, make edits in the copy, and keep the old one safe.
-
-Redux always wants the "photocopy" approach.
-
-Redux devtools extension to debug the react application.
+Inside coverage folder at the root level will have test case coverage report. Open the index.js file and check the which are the lines of the component are not covered (These lines will be highlighted by yellow colour).
 
