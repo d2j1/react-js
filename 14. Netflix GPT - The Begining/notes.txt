@@ -1,0 +1,616 @@
+
+React 13 - Time to test
+
+
+Types of testing - (Developer) 
+
+unit testing - Test react component in isolation.
+
+
+Integration testing -
+test communication between the mulitple components.
+
+End to end testing.
+
+
+Libraries used for testing  -
+
+React testing library - It is built on top of DOM testing library by adding APIs for working with react components.
+
+React testing library also uses the jest behind the scenes.
+
+
+install libraries - 
+
+
+npm i -D @testing-library/react
+
+
+npm i -D @testing-library/react
+
+
+npm i -D jest
+
+
+we are also using babel so we need to install below libraries - 
+
+npm install --save-dev babel-jest @babel/core @babel/preset-env
+
+and we will have to configure the babel - 
+
+create babel.config.js file and put below config in it - 
+
+
+module.exports = {
+  presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
+};
+
+
+
+Parcel uses babel behind the scenes and it has its own configuration defined for babel. So this above configuration will overide the parcels internal configuraiton, to avoid this configuration override issue we will create new .parcelrc file  and new config to disable babel transpilation.
+
+
+ref - https://parceljs.org/languages/javascript/#babel
+
+
+create below file at root - 
+
+.parcelrc
+
+content of above file - 
+
+{
+  "extends": "@parcel/config-default",
+  "transformers": {
+    "*.{js,mjs,jsx,cjs,ts,tsx}": [
+      "@parcel/transformer-js",
+      "@parcel/transformer-react-refresh-wrap"
+    ]
+  }
+}
+
+
+
+run below command to start the testing - 
+
+npm run test 
+
+
+
+above command should give no tests found error as there are no test cases written.
+
+
+
+To write test cases run below command - 
+
+npx create jest 
+
+while running above cmd, select below options - 
+
+Ok to proceed -> Y
+
+would you like to use TypeScript for config file -> No
+
+choose test environment - select jsdom option.
+
+Reports -> Yes
+
+which provider should be used to instrument code for coverage -> babel
+
+
+Now install jsdom - 
+
+npm install --save-dev jest-environment-jsdom
+
+
+
+Write test cases - 
+
+
+create __tests__ folder inside components folder and we will write all the test case files in this folder.
+
+We can create __tests__ folder anywhere in our project still it will work.
+
+or we can just create file with below naming format to write the test cases anywhere in our project, it will also work.
+
+
+Cart.test.js
+Cart.test.ts
+Cart.spec.js
+Cart.spec.ts
+
+
+
+
+To test Sum component - we have created __tests__ folder inside components folder and in this folder we have created sum.test.js file to write the test cases of sum component.
+
+sum.test.js - 
+
+
+import { expect, test } from "@jest/globals";
+import Sum from "../Sum";
+
+
+test("Sum function should calculate the sum of two numbers", () => {
+    
+    expect(Sum({ a: 3, b: 5 })).toBe(8);
+    expect(Sum({ a: -3, b: 3 })).toBe(0);
+    expect(Sum({ a: -3, b: -6 })).toBe(-9);
+});
+
+test("Sum function should calculate the sum of two numbers", () => {
+    
+    expect(Sum({ a: 3, b: 5 })).toBe(9);
+    expect(Sum({ a: -3, b: 3 })).toBe(0);
+    expect(Sum({ a: -3, b: -6 })).toBe(-9);
+});
+
+
+Use below command to run the test cases - 
+
+npm run test
+
+
+Test whether component is rendered or not - 
+
+install below library to add support of jsx in the test cases - 
+
+npm install @babel/preset-react
+
+and add below config in babel.config.js file - 
+
+module.exports = {
+  presets: [['@babel/preset-env', {targets: {node: 'current'}}],
+ ["@babel/preset-react", { runtime: "automatic" }]],
+  
+};
+
+
+npm install --save-dev @testing-library/jest-dom
+
+
+Test cases - 
+
+about.test.js - 
+
+
+
+import { describe, expect, test } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+
+
+import About from "../About";
+
+
+  test("About component should render correctly", () => {
+  const { getByText } = render(<About />);
+  expect(getByText("About us page")).toBeInTheDocument(); 
+});
+
+test("About component should have correct content", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+test("About component should have button", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+
+
+test("About component should have correct paragraph", () => {
+  render(<About />);
+  const paragraph = screen.getByText("This is namaste react about page of the course");
+  expect(paragraph).toBeInTheDocument();
+});
+
+test("About component should have 2 buttons", () => {
+  render(<About />);
+    
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+We can grounp the test cases positive test cases, negative test cases etc by using describe - 
+
+
+import { describe, expect, test } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+
+
+import About from "../About";
+
+
+
+
+describe("About Component Tests", () => {
+  test("About component should render correctly", () => {
+  const { getByText } = render(<About />);
+  expect(getByText("About us page")).toBeInTheDocument(); 
+});
+
+test("About component should have correct content", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+test("About component should have button", () => {
+  render(<About />);
+
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+
+
+
+test("About component should have correct paragraph", () => {
+  render(<About />);
+  const paragraph = screen.getByText("This is namaste react about page of the course");
+  expect(paragraph).toBeInTheDocument();
+});
+
+test("About component should have 2 buttons", () => {
+  render(<About />);
+    
+  const buttons = screen.getAllByRole("button");
+  expect(buttons).toHaveLength(2);
+});
+
+});
+
+
+
+In header component we have used redux store and react router, while testing header we need to provide these depedencies shown below - 
+
+
+Header.test.js - 
+
+import { render, screen } from "@testing-library/react";
+import Header from "../Header";
+import "@testing-library/jest-dom";
+import { describe, expect, test } from "@jest/globals";
+import { Provider } from "react-redux";
+import appStore from "../../utils/appStore";
+import { BrowserRouter } from "react-router-dom";
+
+test("Header component should render correctly", () => {
+
+    render(
+    <BrowserRouter>
+    <Provider store={appStore}>
+    <Header />
+    </Provider>
+    </BrowserRouter>
+);
+    const headerElement = screen.getByText("Home");
+    expect(headerElement).toBeInTheDocument();
+});
+
+
+
+test("Header component has Login and logout button", () => {
+
+    render(
+    <BrowserRouter>
+    <Provider store={appStore}>
+    <Header />
+    </Provider>
+    </BrowserRouter>
+);
+    const loginBtn = screen.getByRole("button", {  name: "Login"});
+    expect(loginBtn).toBeInTheDocument();
+
+    loginBtn.click();
+
+    const logoutBtn = screen.getByRole("button", {  name: "-- Log out"});
+    expect(logoutBtn).toBeInTheDocument();
+});
+
+
+
+Mocking - 
+
+
+
+// src/components/UserProfile.jsx
+import React, { useEffect, useState } from "react";
+
+function UserProfile({ username }) {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch(`https://api.github.com/users/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+
+    fetchUser();
+  }, [username]);
+
+  if (error) return <p role="alert">Error: {error}</p>;
+  if (!user) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <h1 data-testid="name">{user.name}</h1>
+      <p data-testid="bio">{user.bio}</p>
+    </div>
+  );
+}
+
+export default UserProfile;
+
+
+
+Test cases - 
+
+
+// src/components/__tests__/UserProfile.test.js
+import React from "react";
+import { render, screen, act } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import UserProfile from "../UserProfile";
+
+// 🌟 Global fetch mock
+global.fetch = jest.fn();
+
+beforeEach(() => {
+  fetch.mockClear(); // reset between tests
+});
+
+test("displays loading state initially", async () => {
+  await act(async () => {
+    render(<UserProfile username="d2j1" />);
+  });
+  expect(screen.getByText("Loading...")).toBeInTheDocument();
+});
+
+test("renders user data when fetch succeeds", async () => {
+  const mockUser = { name: "DJ", bio: "Java Developer" };
+
+  fetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => mockUser,
+  });
+
+  await act(async () => {
+    render(<UserProfile username="d2j1" />);
+  });
+
+  // Wait for the state update after fetch resolves
+  await act(async () => {
+    // flush promises
+    await Promise.resolve();
+  });
+
+  expect(screen.getByTestId("name")).toHaveTextContent("DJ");
+  expect(screen.getByTestId("bio")).toHaveTextContent("Java Developer");
+});
+
+test("renders error message when fetch fails", async () => {
+  fetch.mockResolvedValueOnce({ ok: false });
+
+  await act(async () => {
+    render(<UserProfile username="invalidUser" />);
+  });
+
+  // Wait for state update
+  await act(async () => {
+    await Promise.resolve();
+  });
+
+  expect(screen.getByRole("alert")).toHaveTextContent("Failed to fetch");
+});
+
+
+Testing search component - 
+
+Search.jsx - 
+
+
+// src/components/Search.jsx
+import React, { useState } from "react";
+
+function Search({ onSearch }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+
+  const handleSearch = async () => {
+    const res = await onSearch(query); // calling parent/mock function
+    setResults(res);
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        data-testid="search-input"
+      />
+      <button onClick={handleSearch} data-testid="search-button">
+        Search
+      </button>
+      <ul data-testid="results-list">
+        {results.map((item, idx) => (
+          <li key={idx}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default Search;
+
+
+
+Test cases - 
+
+
+import React from "react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import Search from "../Search";
+
+describe("Search component", () => {
+  const mockSearch = jest.fn();
+
+  beforeEach(() => {
+    mockSearch.mockClear();
+  });
+
+  test("renders input and button", () => {
+    render(<Search onSearch={mockSearch} />);
+    expect(screen.getByTestId("search-input")).toBeInTheDocument();
+    expect(screen.getByTestId("search-button")).toBeInTheDocument();
+  });
+
+  test("allows user to type in input", () => {
+    render(<Search onSearch={mockSearch} />);
+    const input = screen.getByTestId("search-input");
+    fireEvent.change(input, { target: { value: "apple" } });
+    expect(input.value).toBe("apple");
+  });
+
+  test("calls onSearch and displays results", async () => {
+    const results = ["apple", "apricot"];
+    mockSearch.mockResolvedValueOnce(results);
+
+    render(<Search onSearch={mockSearch} />);
+
+    const input = screen.getByTestId("search-input");
+    const button = screen.getByTestId("search-button");
+
+    // Type query
+    fireEvent.change(input, { target: { value: "ap" } });
+    expect(input.value).toBe("ap");
+
+    // Click search
+    await act(async () => {
+      fireEvent.click(button);
+    });
+
+    // Wait for results to update
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const listItems = screen.getAllByRole("listitem"); // this will all the li element from the page.
+	
+	
+    expect(listItems).toHaveLength(2);
+    expect(listItems[0]).toHaveTextContent("apple");
+    expect(listItems[1]).toHaveTextContent("apricot");
+
+    // Ensure onSearch was called with correct query
+    expect(mockSearch).toHaveBeenCalledWith("ap");
+  });
+});
+
+
+
+BeforeEach, BeforeAll, AfterEach, AfterAll - 
+
+beforeAll
+
+Runs once before all tests in a file or describe block.
+
+Useful for expensive setup that you only want to do once, like connecting to a database or starting a server.
+
+beforeAll(() => {
+  console.log("Runs once before all tests");
+});
+
+2️⃣ beforeEach
+
+Runs before each individual test.
+
+Useful to reset mocks, render components freshly, or prepare the test environment.
+
+beforeEach(() => {
+  console.log("Runs before every test");
+});
+
+3️⃣ afterEach
+
+Runs after each individual test.
+
+Useful for cleanup: clearing mocks, removing elements from DOM, resetting global variables.
+
+afterEach(() => {
+  console.log("Runs after every test");
+});
+
+4️⃣ afterAll
+
+Runs once after all tests in a file or describe block.
+
+Useful to close connections, servers, or clean up resources that were created in beforeAll.
+
+afterAll(() => {
+  console.log("Runs once after all tests");
+});
+
+
+Example - 
+
+describe("Math tests", () => {
+  beforeAll(() => console.log("Math: beforeAll - runs once before all math tests"));
+  beforeEach(() => console.log("Math: beforeEach - runs before each math test"));
+  afterEach(() => console.log("Math: afterEach - runs after each math test"));
+  afterAll(() => console.log("Math: afterAll - runs once after all math tests"));
+
+  test("1 + 1 = 2", () => {
+    console.log("Running math test 1");
+    expect(1 + 1).toBe(2);
+  });
+
+  test("2 + 2 = 4", () => {
+    console.log("Running math test 2");
+    expect(2 + 2).toBe(4);
+  });
+});
+
+describe("String tests", () => {
+  beforeAll(() => console.log("String: beforeAll - runs once before all string tests"));
+  beforeEach(() => console.log("String: beforeEach - runs before each string test"));
+  afterEach(() => console.log("String: afterEach - runs after each string test"));
+  afterAll(() => console.log("String: afterAll - runs once after all string tests"));
+
+  test('"abc".toUpperCase', () => {
+    console.log("Running string test 1");
+    expect("abc".toUpperCase()).toBe("ABC");
+  });
+
+  test('"hello".length', () => {
+    console.log("Running string test 2");
+    expect("hello".length).toBe(5);
+  });
+});
+
+
+
+Inside coverage folder at the root level will have test case coverage report. Open the index.js file and check the which are the lines of the component are not covered (These lines will be highlighted by yellow colour).
+
