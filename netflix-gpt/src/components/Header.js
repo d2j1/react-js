@@ -1,33 +1,49 @@
-import { useState } from "react";
+import {signOut} from "firebase/auth";
+import { auth } from '../utils/firebase.js';
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { removeUser } from "../utils/userSlice.js";
 
 const Header = () => {
+    const navigate = useNavigate();
+    const user = useSelector((store) => store.user);
+     const dispatch = useDispatch();
 
-    const [isSignin, setIsSignin] = useState(true);
+    const handleSignOut = () => {
+        // sign out logic
 
-    const toggleSignInForm = () => {
-        setIsSignin(!isSignin);
-    }
-
+signOut(auth).then(() => {
+  // Sign-out successful.
+  dispatch(removeUser());
+  
+  navigate("/");
+}).catch((error) => {
+  // An error happened.
+  navigate("/error");
+});
+    }   
 
   return (
-    <>
-    <div className="absolute z-10">
+    
+    <div className="absolute w-screen z-10 px-8 py-2 bg-gradient-to-b from-black flex justify-between items-center">
     <img
       src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
       alt="Netflix Logo"
-      className="w-44 px-8 py-2 bg-gradient-to-b from-black"
+        className="w-44"
     />
-    </div>
 
-    <form className="absolute p-12 bg-black w-3/12 my-28 mx-auto right-0 left-0 text-white flex flex-col items-center bg-opacity-80">
-        <h1 className="text-3xl font-bold mb-4">{ isSignin? "Sign In" : "Sign Up"}</h1>
-        { !isSignin && ( <input type="text" placeholder="Full Name"className="py-2 my-2 w-full placeholder:p-1 bg-gray-800"/> )}
-        <input type="text" placeholder="Email Address"className="py-2 my-2 w-full placeholder:p-1 bg-gray-800"/>
-        <input type="password" placeholder="Password"className="py-2 my-2 w-full placeholder:p-1 bg-gray-800"/>
-        <button className="py-3 my-2 bg-red-700 rounded-md w-full">{ isSignin? "Sign In" : "Sign Up"}</button>
-        <p className="text-sm">{isSignin? "Already have an account?" : "New to Netflix?" } <span onClick={toggleSignInForm} className="text-white font-semibold cursor-pointer">{ isSignin? "Sign In Now" : "Sign Up Now"}</span></p>
-    </form>
-        </>
+  {user && (<div className="flex p-2 ">
+        <img
+          src="https://occ-0-5690-3662.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABeuqjuQsRgqEDlibtJTI5BMf8IxhLlLOeIT6xI4TL57mqv7XHja43gx02S8pZVe8JNGRQXjnrUk1VcsTXqi83tFKPI6OR3k.png?r=bd7"
+          alt="account"
+          className=""
+        />
+        <button onClick={handleSignOut} className="bg-red-600 px-4 py-1 rounded text-white ml-4">Sign Out</button>
+    </div>
+  )}
+    </div>
+  
   );
 }
 
