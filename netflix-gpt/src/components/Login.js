@@ -8,7 +8,7 @@ import { auth } from '../utils/firebase.js';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice.js';
-
+import { BG_URL } from "../utils/constants.js";
 
 const Login = () => {
 
@@ -108,7 +108,7 @@ const Login = () => {
     <Header/>
     <div > 
         <img
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/024bfb98-9e9d-441d-9c5f-d2c798d8e42f/web/IN-en-20251013-TRIFECTA-perspective_b6324826-0535-47c5-be5f-4f50e9663eaf_large.jpg"
+          src={BG_URL}
           alt="Login background"
           className="absolute w-full h-screen object-cover"
         />
