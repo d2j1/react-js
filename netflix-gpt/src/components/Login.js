@@ -64,7 +64,7 @@ const Login = () => {
         displayName: name
     }));
 
-    navigate("/browse");
+    // navigate("/browse");
   // ...
 }).catch((error) => {
   // An error occurred
@@ -88,7 +88,7 @@ const Login = () => {
   .then((userCredential) => {
     // Signed in 
     
-    navigate("/browse");
+    // navigate("/browse");
     // ...
   })
   .catch((error) => {
