@@ -9,7 +9,7 @@ const VideoBackground = ({ movieId }) => {
     return <div>Loading trailer...</div>; // or null / spinner
   }
 
-  console.log("trailerVideo:", trailerVideo);
+  
 
   return (
     <div className="w-full overflow-x-hidden">
